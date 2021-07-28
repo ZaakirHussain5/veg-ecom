@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+django-rest-knox = "*"
+pillow = "*"
+django-rest-swagger = "*"
+drf-openapi = "*"
+pyyaml = "*"
+xhtml2pdf = "*"
+coreapi = "*"
+
+[requires]
+python_version = "3.6"
