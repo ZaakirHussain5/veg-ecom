@@ -1,27 +1,60 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import { DataGrid, GridToolbar } from '@material-ui/data-grid';
 import Title from '../dashboard/Title';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 export default function Orders() {
+    const date = new Date();
+    const todayDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`
+    const [rows, setRows] = useState([]);
+    const [from_date, setFromDate] = useState('');
+    const [to_date, setToDate] = useState('')
 
-    function createData(id, orderID, date, name, location, phoneNo) {
-        return { id, orderID, date, name, location, phoneNo };
+    const getOrderData = () =>{
+        let url = '/api/w/AdminOrder/';
+        let params = []
+        if (to_date !== ''){
+            params.push(`to_date=${to_date}`)
+        }
+        if (from_date !== ''){
+            params.push(`from_date=${from_date}`)
+        }
+        const queryParams = params.join('&')
+        if(queryParams !== ''){
+            url = `${url}?${queryParams}`;
+        }
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Token ${localStorage.getItem('AdminToken')}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                setRows(data)
+            })
     }
 
-    const rows = [
-        createData("1", "VBO2021-1", '16 Mar, 2021', 'Elvis Presley', 'Tupelo, MS', '9845714254'),
-        createData("2", "VBO2021-2", '16 Mar, 2021', 'Paul McCartney', 'London, UK', '9568589898'),
-        createData("3", "VBO2021-3", '16 Mar, 2021', 'Tom Scholz', 'Boston, MA', '7584787475'),
-        createData("4", "VBO2021-4", '16 Mar, 2021', 'Michael Jackson', 'Gary, IN', '7373256525'),
-        createData("5", "VBO2021-5", '15 Mar, 2021', 'Bruce Springsteen', 'Long Branch, NJ', '9568747145'),
-    ];
+
+    useEffect(() => {
+        return getOrderData()
+    }, [])
 
     const cols = [
-        { field: 'orderID', headerName: 'Order #', width: 150 },
-        { field: 'date', headerName: 'Ordered Date', width: 170 },
-        { field: 'location', headerName: 'Shipping Address', width: 200 },
+        { field: 'orderId', headerName: 'Order #', width: 150},
+        { field: 'formattedCreatedAt', headerName: 'Ordered Date', width: 170
+        
+        },
+        { field: 'location', headerName: 'Shipping Address', width: 200,
+        renderCell: (GridCellParams) => {
+            // console.log(GridCellParams)
+            return (
+                <div>{GridCellParams.row.shippingAddress.address} </div>
+            )}
+        },
         {
             field: 'id',
             headerName: ' ',
@@ -50,19 +83,24 @@ export default function Orders() {
                 InputLabelProps={{
                     shrink: true,
                 }}
+                value={from_date}
+                onChange={(e)=>setFromDate(e.target.value)}
+
             />
             <TextField
                 size="small"
                 variant="outlined"
-                label="From Date"
+                label="To Date"
                 helperText="Select To date"
                 type="date"
                 style={{ marginRight: "30px" }}
                 InputLabelProps={{
                     shrink: true,
                 }}
+                value={to_date}
+                onChange={(e)=>setToDate(e.target.value)}
             />
-            <Button variant="contained" color="primary">
+            <Button variant="contained" color="primary" onClick={getOrderData}>
                 Get Orders
             </Button>
             <div style={{ height: 400, width: '100%' }}>

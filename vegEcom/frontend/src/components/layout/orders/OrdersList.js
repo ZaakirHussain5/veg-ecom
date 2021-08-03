@@ -12,10 +12,42 @@ export default function OrdersList() {
 
     const [orderId, setOrderId] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
+    const [from_date, setFromDate] = useState('');
+    const [to_date, setToDate] = useState('');
+
 
     function createData(id, orderID, date, location, phoneNo) {
         return { id, orderID, date, location, phoneNo };
     }
+
+    
+    const getOrderData = () =>{
+        let url = '/api/w/AdminOrder/';
+        let params = []
+        if (to_date !== ''){
+            params.push(`to_date=${to_date}`)
+        }
+        if (from_date !== ''){
+            params.push(`from_date=${from_date}`)
+        }
+        const queryParams = params.join('&')
+        if(queryParams !== ''){
+            url = `${url}?${queryParams}`;
+        }
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Token ${localStorage.getItem('AdminToken')}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // console.log(data)
+            setRows(data)
+        })
+    }
+
 
     useEffect(() => {
         setIsLoading(true)
@@ -43,10 +75,17 @@ export default function OrdersList() {
     const [rows, setRows] = useState([]);
 
     const cols = [
-        { field: 'orderID', headerName: 'Order #', width: 150 },
-        { field: 'phoneNo', headerName: 'Phone No.', width: 160 },
-        { field: 'date', headerName: 'Ordered Date', width: 170 },
-        { field: 'location', headerName: 'Shipping Address', width: 200 },
+        { field: 'orderId', headerName: 'Order #', width: 150},
+        { field: 'formattedCreatedAt', headerName: 'Ordered Date', width: 170
+        
+        },
+        { field: 'location', headerName: 'Shipping Address', width: 200,
+        renderCell: (GridCellParams) => {
+            // console.log(GridCellParams)
+            return (
+                <div>{GridCellParams.row.shippingAddress.address} </div>
+            )}
+        },
         {
             field: 'id',
             headerName: ' ',
@@ -90,6 +129,8 @@ export default function OrdersList() {
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        value={from_date}
+                        onChange={(e)=>setFromDate(e.target.value)}
                     />
                     <TextField
                         size="small"
@@ -101,8 +142,11 @@ export default function OrdersList() {
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        value={to_date}
+                        onChange={(e)=>setToDate(e.target.value)}
+
                     />
-                    <Button variant="contained" color="primary">
+                    <Button variant="contained" color="primary" onClick={getOrderData}>
                         Get Orders
                     </Button>
                     {isLoading ?
