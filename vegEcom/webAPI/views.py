@@ -6,7 +6,7 @@ from django.db.models import Sum
 from decimal import Decimal
 from django.contrib.auth.models import User
 
-from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer
+from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer
 from .models import Invoice,UserCreditLedger
 from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer
 from mobileAPI.models import Order
@@ -55,6 +55,18 @@ class AdminInvoiceAPI(viewsets.ModelViewSet):
     def get_queryset(self):
         self.serializer_class = InvoiceSerializer
         return Invoice.objects.all().order_by('-created_at')
+    
+    def retrieve(self, request, *args, **kwargs):
+        self.serializer_class = InvoiceSerializer
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+class UpdateInvoiceAPI(viewsets.ModelViewSet):
+    serializer_class = UpdateInvoiceSerializer
+    permission_classes =[permissions.IsAuthenticated]
+
+    
         
 
 class UserLedgerAPI(generics.GenericAPIView):

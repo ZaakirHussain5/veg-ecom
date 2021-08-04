@@ -8,6 +8,7 @@ import InvoiceDetails from './InvoiceDetails'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AddIcon from '@material-ui/icons/Add';
 import { Link } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
 
 
 export default function InvoicesList() {
@@ -40,8 +41,10 @@ export default function InvoicesList() {
                 )
             })
             setRows(newInvoicesList)
+            setIsLoading(false)
         }).catch(err => {
             console.log(err)
+            setIsLoading(false)
         })
 
     },[])
@@ -122,16 +125,20 @@ export default function InvoicesList() {
                             shrink: true,
                         }}
                     />
-                    <div style={{ height: 400, width: '100%' }}>
-                        <DataGrid
-                            density="compact"
-                            rows={rows}
-                            columns={cols}
-                            pageSize={5}
-                            components={{
-                                Toolbar: GridToolbar,
-                            }} />
-                    </div>
+                    {isLoading ?
+                        <Skeleton count={12} />
+                        :
+                        <div style={{ height: 400, width: '100%' }}>
+                            <DataGrid
+                                density="compact"
+                                rows={rows}
+                                columns={cols}
+                                pageSize={5}
+                                components={{
+                                    Toolbar: GridToolbar,
+                                }} />
+                        </div>
+                    }
                 </div>
             }
         </Fragment>

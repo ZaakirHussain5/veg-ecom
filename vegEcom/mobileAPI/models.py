@@ -155,7 +155,7 @@ class Order(models.Model):
     status = models.CharField(max_length=255,default="Pending")
     shippingAddress = models.ForeignKey(OrderAddress,on_delete=models.SET_NULL,null=True,related_name="ShippingAddress")
     billingAddress = models.ForeignKey(OrderAddress,on_delete=models.SET_NULL,null=True,related_name="BillingAddress")
-
+    isInvoiceCreated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

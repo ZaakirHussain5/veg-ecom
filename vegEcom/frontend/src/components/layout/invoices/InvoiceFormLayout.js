@@ -1,4 +1,4 @@
-import React,{ useState , useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -21,6 +21,8 @@ import MuiAlert from '@material-ui/lab/Alert';
 import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
 import Title from '../dashboard/Title'
+import CheckIcon from '@material-ui/icons/Check';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     input: {
@@ -39,246 +41,351 @@ function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
-export default function InvoiceFormLayout(props){
+export default function InvoiceFormLayout(props) {
     const classes = useStyles();
+    const history = useHistory();
 
-    const [invoiceId,setInvoiceId] = useState(props.id)
-    const [orderId,setOrderId] = useState(props.orderId)
+    const [invoiceId, setInvoiceId] = useState(props.id)
+    const [orderId, setOrderId] = useState(props.orderId)
 
-    const [customerName,setCustomerName] = useState("");
-    const [customerNameError,setCustomerNameError] = useState(false);
-    const [phoneNo,setPhoneNo] = useState("");
-    const [phoneNoError,setPhoneNoError] = useState(false);
-    const [address,setAddress] = useState("");
-    const [addressError,setAddressError] = useState(false);
-    
-    const [orderItems,setOrderItems] = useState([]);
-    const [itemName,setItemName] = useState("");
-    const [qty,setQty] = useState(1.00);
-    const [price,setPrice] = useState(0.00);
-    const [amount,setAmount] = useState(0.00);
-    const [subTotal,setSubTotal] = useState(0.00);
-    const [discount,setDiscount] = useState(0.00);
-    const [grandTotal,setGrandTotal] = useState(0.00);
-    const [itemNameError,setItemNameError] = useState(false);
-    const [qtyError,setQtyError] = useState(false);
-    const [priceError,setPriceError] = useState(false);
-    const [amountError,setAmountError] = useState(false);
+    const [customerName, setCustomerName] = useState("");
+    const [phoneNo, setPhoneNo] = useState("");
+    const [phoneNoError, setPhoneNoError] = useState(false);
+    const [address, setAddress] = useState("");
+    const [addressError, setAddressError] = useState(false);
 
-    const [paidAmount,setPaidAmount] = useState(0.00);
-    const [balance,setBalance] = useState(0.00);
+    const [orderItems, setOrderItems] = useState([]);
+    const [itemName, setItemName] = useState("");
+    const [qty, setQty] = useState(1.00);
+    const [price, setPrice] = useState(0.00);
+    const [amount, setAmount] = useState(0.00);
+    const [subTotal, setSubTotal] = useState(0.00);
+    const [discount, setDiscount] = useState(0.00);
+    const [grandTotal, setGrandTotal] = useState(0.00);
+    const [itemNameError, setItemNameError] = useState(false);
+    const [qtyError, setQtyError] = useState(false);
+    const [priceError, setPriceError] = useState(false);
+    const [amountError, setAmountError] = useState(false);
 
-    const[isLoading,setIsLoading] = useState(false)
-    const[isAlert,setIsAlert] = useState(false)
-    const[alert,setAlert] = useState({
-        message:"",color:"success"
+    const [paidAmount, setPaidAmount] = useState(0.00);
+    const [balance, setBalance] = useState(0.00);
+
+    const [editRowIndex, setEditRowIndex] = useState(-1)
+    const [editQty, setEditQty] = useState(0)
+    const [editPrice, setEditPrice] = useState(0)
+    const [editAmount, setEditAmount] = useState(0)
+
+    const [chargeName,setChargeName] = useState("")
+    const [chargeAmount,setChargeAmount] = useState(0.00)
+    const [charges,setCharges] = useState([])
+
+    const [isLoading, setIsLoading] = useState(false)
+    const [isAlert, setIsAlert] = useState(false)
+    const [alert, setAlert] = useState({
+        message: "", color: "success"
     })
 
-    useEffect(()=>{
-        calculate()
-    },[discount,orderItems])
+    const [submitUrl,setSubmitUrl] = useState("/api/w/invoices/")
+    const [submitMethod,setSubmitMethod] = useState("POST")
 
-    useEffect(()=>{
-        if(!orderId || orderId==0)
+    useEffect(() => {
+        calculate()
+    }, [discount, orderItems,charges])
+
+    useEffect(() => {
+        loadOrderDetails()
+    }, [orderId])
+
+    const loadOrderDetails = function () {
+        if (!orderId || orderId == 0)
             return
         setIsLoading(true)
 
-        fetch(`/api/w/AdminOrder/${orderId}`,{
+        fetch(`/api/w/AdminOrder/${orderId}`, {
+            headers: {
+                Authorization: `Token ${localStorage.getItem("AdminToken")}`
+            }
+        })
+            .then(res => res.json())
+            .then(order => {
+                setCustomerName(order.user.first_name)
+                setPhoneNo(order.user.username)
+                setAddress(order.billingAddress.address)
+
+                var newItemsList = []
+
+                console.log(order)
+
+                order.items.map(orderItem => {
+                    var _itemName = "";
+                    var _qty = orderItem.qty;
+                    var _price = 0.00;
+                    if (order.user.deliveryType == "R") {
+                        _price = orderItem.productType.rPrice
+                        _price = _price / orderItem.productType.rPriceQuantity
+                    }
+                    if (order.user.deliveryType == "G") {
+                        _price = orderItem.productType.gPrice
+                        _price = _price / orderItem.productType.gPriceQuantity
+                    }
+                    if (order.user.deliveryType == "H") {
+                        _price = orderItem.productType.hPrice
+                        _price = _price / orderItem.productType.hPriceQuantity
+                    }
+
+                    for (let i = 0; i < _qty; i++) {
+                        _itemName = `${orderItem.productType.name} B${i + 1}`
+                        newItemsList.push({
+                            itemName: _itemName, qty: 1, price: _price, amount: _price
+                        })
+                    }
+
+                    setOrderItems(newItemsList)
+                })
+
+                setIsLoading(false)
+            })
+    }
+
+    useEffect(() => {
+        loadInvoiceDetails()
+    }, [invoiceId])
+
+    const loadInvoiceDetails = function (){
+        if (!invoiceId || invoiceId == 0)
+            return
+        setIsLoading(true)
+        fetch(`/api/w/invoices/${invoiceId}/`,{
+            method:"GET",
             headers:{
                 Authorization:`Token ${localStorage.getItem("AdminToken")}`
             }
         })
-        .then(res => res.json())
-        .then(order => {
-            setCustomerName(order.user.first_name)
-            setPhoneNo(order.user.username)
-            setAddress(order.billingAddress.address)
-
-            var newItemsList = []
-
-            console.log(order)
+        .then(res=> res.json())
+        .then(invoice => {
+            setSubmitUrl(`/api/w/UpdateInvoice/`)
+            setCustomerName(invoice.user.first_name)
+            setPhoneNo(invoice.user.username)
+            setAddress(invoice.billingAddress)
+            setIsLoading(false)
             
-            order.items.map(orderItem => {
-                var _itemName = "";
-                var _qty = orderItem.qty;
-                var _price = 0.00;
-                if (order.user.deliveryType == "R"){
-                    _price = orderItem.productType.rPrice
-                    _price = _price / orderItem.productType.rPriceQuantity
-                }
-                if (order.user.deliveryType == "G"){
-                    _price = orderItem.productType.gPrice
-                    _price = _price / orderItem.productType.gPriceQuantity
-                }
-                if (order.user.deliveryType == "H"){
-                    _price = orderItem.productType.hPrice
-                    _price = _price / orderItem.productType.hPriceQuantity
-                }
+            var invoiceItemsList = []
+            var invoiceChargesList = []
 
-                for(let i=0; i < _qty ; i++){
-                    _itemName = `${orderItem.productType.name} B${i+1}` 
-                    newItemsList.push({
-                        itemName:_itemName,qty:1,price:_price,amount:_price
-                    })
-                }
-
-                setOrderItems(newItemsList)
+            invoice.invoiceItems.map(({item,qty,price,total})=>{
+                invoiceItemsList.push({
+                    itemName:item,
+                    qty,
+                    price,
+                    amount:total
+                })
+            })
+            
+            invoice.invoiceCharges.map(({chargeName,chargeAmount})=>{
+                invoiceChargesList.push({
+                    chargeName,chargeAmount
+                })
             })
 
-            setIsLoading(false)
+            setOrderItems(invoiceItemsList)
+            setCharges(invoiceChargesList)
         })
+    }
 
-
-    },[orderId])
-    
-    useEffect(()=>{
-        if(!invoiceId || invoiceId==0)
-            return
-        setIsLoading(true)
-        
-        
-    },[invoiceId])
-
-    const removeItem = (name)=>{
+    const removeItem = (name) => {
         var newList = orderItems.filter((item) => item.itemName != name)
 
         setOrderItems(newList)
     }
 
-    const addItem = ()=>{
+    const addItem = () => {
         setItemNameError(false);
         setQtyError(false);
         setPriceError(false);
         setAmountError(false);
 
-        if(itemName == ''){
+        if (itemName == '') {
             setItemNameError(true)
             return
         }
-        if(qty == 0){
+        if (qty == 0) {
             setQtyError(true)
             return
         }
 
-        setAmount(price*qty)
+        setAmount(price * qty)
         const newOrderItemsList = orderItems.concat({
-            itemName, price, qty, amount 
+            itemName, price, qty, amount
         })
 
         setOrderItems(newOrderItemsList)
         calculate()
-        setItemName('') 
-        setQty(1) 
-        setPrice(10.00) 
+        setItemName('')
+        setQty(1)
+        setPrice(10.00)
         setAmount(0.00)
     }
 
-    const calculate = ()=>{
+    const calculate = () => {
         var sumSubTotal = 0.00
-        orderItems.forEach(function(item){
-            sumSubTotal += item.amount
+        orderItems.forEach(function (item) {
+            sumSubTotal += parseFloat(item.amount)
         })
 
         setSubTotal(sumSubTotal)
 
-        var _grandTotal = sumSubTotal-(sumSubTotal * (discount/100))
+        var _grandTotal = sumSubTotal - (sumSubTotal * (discount / 100))
 
-        setGrandTotal(_grandTotal) 
+        var totalCharges = 0.00
+        charges.map(charge=>{
+            totalCharges += parseFloat(charge.chargeAmount)
+        })
+
+        _grandTotal += totalCharges
+
+        setGrandTotal(_grandTotal)
         setPaidAmount(_grandTotal)
     }
 
-    const handlePaidAmountChange = function(){
+    const handlePaidAmountChange = function () {
         var _balance = grandTotal - paidAmount
-        console.log(grandTotal,paidAmount)
-        setBalance(_balance) 
+        console.log(grandTotal, paidAmount)
+        setBalance(_balance)
     }
 
-    const submitInvoice = function(){
-        if(orderItems.length == 0){
+    const submitInvoice = function () {
+        if (orderItems.length == 0) {
             setAlert({
-                message:"Atleast one item should be added to the Invoice.",
-                color:"error"
+                message: "Atleast one item should be added to the Invoice.",
+                color: "error"
             })
             setIsAlert(true)
             return
         }
-        
+
         setIsLoading(true)
 
         var itemsList = []
-        orderItems.map(({itemName , price , qty , amount}) => {
+        orderItems.map(({ itemName, price, qty, amount }) => {
             itemsList.push({
-                item:itemName,
+                item: itemName,
                 price,
                 qty,
-                unit:"KGS",
-                total:amount
+                unit: "KGS",
+                total: amount
             })
         })
 
         var reqBody = {
-            fullname:customerName,
+            fullname: customerName,
             phoneNo,
-            shippingAddress:address,
-            billingAddress:address,
-            total:subTotal,
+            shippingAddress: address,
+            billingAddress: address,
+            total: subTotal,
             discount,
             grandTotal,
-            status:"Pending",
-            paid:paidAmount,
+            status: "Pending",
+            paid: paidAmount,
             balance,
-            items:itemsList
+            items: itemsList,
+            charges,
+            orderId,
+            invoiceId
         }
 
-        fetch('/api/w/invoices/',{
-            method:'POST',
-            headers:{
-                Authorization:`Token ${localStorage.getItem("AdminToken")}`,
-                "Content-type":"application/json"
+        fetch(submitUrl, {
+            method: submitMethod,
+            headers: {
+                Authorization: `Token ${localStorage.getItem("AdminToken")}`,
+                "Content-type": "application/json"
             },
-            body:JSON.stringify(reqBody)
+            body: JSON.stringify(reqBody)
         }).then(res => {
             console.log(res)
-            if(!res.ok)
+            if (!res.ok)
                 throw Error(res.body)
             return res.json()
         }).then(data => {
             setAlert({
-                message:"Invoice Saved Successfuly.",
-                color:"success"
+                message: "Invoice Saved Successfuly.",
+                color: "success"
             })
-            setIsAlert(true)
-            setOrderItems([])
-            setPaidAmount(0.00)
-            setBalance(0.00)
-            setSubTotal(0.00)
-            setDiscount(0.00)
-            setGrandTotal(0.00)
-            setCustomerName("")
-            setPhoneNo("")
-            setAddress("")
+            refreshPage()
             setIsLoading(false)
         }).catch(err => {
             setAlert({
-                message:err.message,
-                color:"error"
+                message: err.message,
+                color: "error"
             })
             setIsAlert(true)
             setIsLoading(false)
+            refreshPage()
         })
+    }
+
+    const refreshPage = function () {
+        setIsAlert(true)
+        setOrderItems([])
+        setPaidAmount(0.00)
+        setBalance(0.00)
+        setSubTotal(0.00)
+        setDiscount(0.00)
+        setGrandTotal(0.00)
+        setCustomerName("")
+        setPhoneNo("")
+        setAddress("")
+        loadOrderDetails()
+        loadInvoiceDetails()
     }
 
     const handleAlertClose = (event, reason) => {
         if (reason === 'clickaway') {
-          return;
+            return;
         }
-    
+
         setIsAlert(false);
     };
 
+    const activateEditMode = (index, curQty, curPrice,curAmount) => {
+        setEditQty(curQty)
+        setEditPrice(curPrice)
+        setEditAmount(curAmount)
+        setEditRowIndex(index)
+    }
+
+    const confirmEdit = (index) => {
+        var newOrderItems = orderItems
+        newOrderItems[index].qty = editQty
+        newOrderItems[index].price = editPrice
+        newOrderItems[index].amount = editQty * editPrice
+        setOrderItems(newOrderItems)
+        calculate()
+
+        setEditRowIndex(-1)
+    }
+
+    const editQtyChange = function (e){
+        setEditQty(e.target.value)
+        setEditAmount(editPrice*editQty)
+    }
+
+    const editPriceChange = function (e){
+        setEditPrice(e.target.value)
+        setEditAmount(editPrice*editQty)
+    }
+    
+    const addCharge = function(){
+        var newChargesItemList = charges.concat({
+            chargeAmount,chargeName
+        })
+        setCharges(newChargesItemList)
+        setChargeName("")
+        setChargeAmount(0.00)
+    }
+
     return (
         <div>
-            <Snackbar open={isAlert} anchorOrigin={{ vertical:"top", horizontal:"center" }} autoHideDuration={6000} onClose={handleAlertClose}>
+            <Snackbar open={isAlert} anchorOrigin={{ vertical: "top", horizontal: "center" }} autoHideDuration={6000} onClose={handleAlertClose}>
                 <Alert onClose={handleAlertClose} severity={alert.color}>
                     {alert.message}
                 </Alert>
@@ -291,32 +398,32 @@ export default function InvoiceFormLayout(props){
             </Title>
             <Grid container spacing={3}>
                 <Grid item xs={6} md={4} lg={3}>
-                        <Title>
-                            Invoice Details
-                        </Title>
-                        <TextField className={classes.input}
-                            label="Customer Name"
-                            variant="outlined"
-                            size="small"
-                            value={customerName}
-                            onChange={event => setCustomerName(event.target.value)}
-                        />
-                        <TextField className={classes.input}
-                            label="Customer Phone No."
-                            variant="outlined"
-                            size="small"
-                            value={phoneNo}
-                            onChange={event => setPhoneNo(event.target.value)}
-                        />
-                        <TextField className={classes.input}
-                            label="Billing Address"
-                            variant="outlined"
-                            size="small"
-                            multiline
-                            rows={4}
-                            value={address}
-                            onChange={event => setAddress(event.target.value)}
-                        />
+                    <Title>
+                        Invoice Details
+                    </Title>
+                    <TextField className={classes.input}
+                        label="Customer Name"
+                        variant="outlined"
+                        size="small"
+                        value={customerName}
+                        onChange={event => setCustomerName(event.target.value)}
+                    />
+                    <TextField className={classes.input}
+                        label="Customer Phone No."
+                        variant="outlined"
+                        size="small"
+                        value={phoneNo}
+                        onChange={event => setPhoneNo(event.target.value)}
+                    />
+                    <TextField className={classes.input}
+                        label="Billing Address"
+                        variant="outlined"
+                        size="small"
+                        multiline
+                        rows={4}
+                        value={address}
+                        onChange={event => setAddress(event.target.value)}
+                    />
                 </Grid>
                 <Grid item xs={6} md={8} lg={9}>
                     <Title>
@@ -344,80 +451,109 @@ export default function InvoiceFormLayout(props){
                             <TableBody>
                                 <TableRow>
                                     <TableCell>
-                                        <TextField 
-                                            size="small" 
-                                            label="Item Name" 
-                                            value={itemName} 
-                                            variant="outlined" 
-                                            style={{ width: 160 }} 
+                                        <TextField
+                                            size="small"
+                                            label="Item Name"
+                                            value={itemName}
+                                            variant="outlined"
+                                            style={{ width: 160 }}
                                             error={itemNameError}
-                                            onChange={(e)=> setItemName(e.target.value) }/>
+                                            onChange={(e) => setItemName(e.target.value)} />
                                     </TableCell>
                                     <TableCell>
-                                        <TextField 
-                                            size="small" 
-                                            label="Quantity" 
+                                        <TextField
+                                            size="small"
+                                            label="Quantity"
                                             value={qty}
                                             min={1}
                                             type="number"
-                                            style={{ width: 80 }} 
-                                            error={qtyError} 
+                                            style={{ width: 80 }}
+                                            error={qtyError}
                                             variant="outlined"
-                                            onChange={(e)=>{
-                                               setQty(e.target.value)
-                                               setAmount(e.target.value * price)  
-                                            } } />
+                                            onChange={(e) => {
+                                                setQty(e.target.value)
+                                                setAmount(e.target.value * price)
+                                            }} />
                                     </TableCell>
                                     <TableCell>
-                                        <TextField 
-                                            size="small" 
-                                            type="number" 
-                                            label="Price" 
+                                        <TextField
+                                            size="small"
+                                            type="number"
+                                            label="Price"
                                             value={price}
-                                            style={{ width: 100 }} 
-                                            error={priceError} 
+                                            style={{ width: 100 }}
+                                            error={priceError}
                                             variant="outlined"
-                                            onChange={(e)=> {
+                                            onChange={(e) => {
                                                 setPrice(e.target.value)
                                                 setAmount(e.target.value * qty)
-                                            } } />
+                                            }} />
                                     </TableCell>
                                     <TableCell>
-                                        <TextField 
-                                            size="small" 
-                                            disabled 
-                                            label="Amount" 
-                                            value={amount} 
-                                            style={{ width: 100 }} 
-                                            error={amountError} 
+                                        <TextField
+                                            size="small"
+                                            disabled
+                                            label="Amount"
+                                            value={amount}
+                                            style={{ width: 100 }}
+                                            error={amountError}
                                             variant="outlined" />
                                     </TableCell>
                                     <TableCell>
-                                        <Button size="small" variant="outlined" color="secondary" aria-label="add" style={{ width: 40 }} onClick={addItem}>
+                                        <Button size="small" variant="contained" color="primary" aria-label="add" style={{ width: 40 }} onClick={addItem}>
                                             <AddIcon />
                                         </Button>
                                     </TableCell>
                                 </TableRow>
-                                {orderItems.map((orderItem,idx) => {
+                                {orderItems.map((orderItem, idx) => {
                                     return (
                                         <TableRow key={idx}>
                                             <TableCell>
                                                 {orderItem.itemName}
                                             </TableCell>
                                             <TableCell>
-                                                {orderItem.qty}
+                                                {editRowIndex == orderItems.indexOf(orderItem) ?
+                                                    <TextField type="number" value={editQty} 
+                                                    onChange={e => editQtyChange(e)} 
+                                                    onKeyUp={e => editQtyChange(e)} 
+                                                    />
+                                                    :
+                                                    orderItem.qty
+                                                }
                                             </TableCell>
                                             <TableCell>
-                                                {orderItem.price}
+                                                {editRowIndex == orderItems.indexOf(orderItem) ?
+                                                    <TextField type="number" value={editPrice} 
+                                                    onChange={e => editPriceChange(e)} 
+                                                    onKeyUp={e => editPriceChange(e)} 
+                                                    />
+                                                    :
+                                                    orderItem.price
+                                                }
                                             </TableCell>
                                             <TableCell>
-                                                {orderItem.amount}
+                                                {editRowIndex == orderItems.indexOf(orderItem) ?
+                                                    editAmount
+                                                    :
+                                                    orderItem.amount
+                                                }
                                             </TableCell>
                                             <TableCell>
-                                                <IconButton size="small" aria-label="edit" color="primary">
-                                                    <EditIcon fontSize="small" />
-                                                </IconButton>
-                                                <IconButton size="small"  aria-label="delete" onClick={() => removeItem(orderItem.itemName)} color="secondary">
+                                                {editRowIndex != orderItems.indexOf(orderItem) ?
+                                                    <IconButton size="small" aria-label="edit" color="primary" onClick={() => {
+                                                        activateEditMode(orderItems.indexOf(orderItem), orderItem.qty, orderItem.price,orderItem.amount)
+                                                    }}>
+                                                        <EditIcon fontSize="small" />
+                                                    </IconButton>
+                                                    :
+                                                    <IconButton size="small" aria-label="edit" color="primary" onClick={() => {
+                                                        confirmEdit(orderItems.indexOf(orderItem))
+                                                    }}>
+                                                        <CheckIcon fontSize="small" />
+                                                    </IconButton>
+                                                }
+
+                                                <IconButton size="small" aria-label="delete" onClick={() => removeItem(orderItem.itemName)} color="secondary">
                                                     <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                             </TableCell>
@@ -425,22 +561,54 @@ export default function InvoiceFormLayout(props){
                                     )
                                 })}
                                 <TableRow>
-                                    <TableCell colSpan="1" style={{fontWeight:500}}>
+                                    <TableCell colSpan="2">
+                                        <TextField
+                                            size="small"
+                                            min={0}
+                                            label="Charge Name"
+                                            variant="outlined"
+                                            fullWidth
+                                            value={chargeName}
+                                            onChange={e => setChargeName(e.target.value)}/>
+                                    </TableCell>
+                                    <TableCell colSpan="2">
+                                        <TextField
+                                            size="small"
+                                            min={0}
+                                            label="Charge Amount"
+                                            variant="outlined"
+                                            fullWidth 
+                                            value={chargeAmount}
+                                            onChange={e => setChargeAmount(e.target.value)}/>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button size="small" variant="contained" color="primary" aria-label="add" style={{ width: 40 }} onClick={addCharge} >
+                                            <AddIcon />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell style={{ fontWeight: 500 }}>
                                         Paid Amount
                                     </TableCell>
                                     <TableCell colSpan="2" align="right">
-                                        <TextField 
-                                          size="small" 
-                                          min={0}
-                                          value={paidAmount}
-                                          label="Paid Amount" 
-                                          variant="outlined"
-                                          onChange={event => {
-                                              setPaidAmount(event.target.value)
-                                              handlePaidAmountChange()
-                                          }} />
+                                        <TextField
+                                            size="small"
+                                            min={0}
+                                            value={paidAmount}
+                                            label="Paid Amount"
+                                            variant="outlined"
+                                            onChange={event => {
+                                                setPaidAmount(event.target.value)
+                                                handlePaidAmountChange()
+                                            }}
+                                            onKeyUp={event => {
+                                                setPaidAmount(event.target.value)
+                                                handlePaidAmountChange()
+                                            }}
+                                        />
                                     </TableCell>
-                                    <TableCell style={{fontWeight:500}}>
+                                    <TableCell style={{ fontWeight: 500 }}>
                                         Subtotal
                                     </TableCell>
                                     <TableCell align="right">
@@ -448,37 +616,50 @@ export default function InvoiceFormLayout(props){
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
-                                    <TableCell  style={{fontWeight:500}}>
+                                    <TableCell style={{ fontWeight: 500 }}>
                                         Balance
                                     </TableCell>
                                     <TableCell colSpan="2" align="right">
-                                        <TextField 
-                                          size="small"
-                                          disabled 
-                                          min={0}
-                                          value={balance}
-                                          label="Balance"  
-                                          variant="outlined"/>
+                                        <TextField
+                                            size="small"
+                                            disabled
+                                            min={0}
+                                            value={balance}
+                                            label="Balance"
+                                            variant="outlined" />
                                     </TableCell>
-                                    <TableCell style={{fontWeight:500}}>
+                                    <TableCell style={{ fontWeight: 500 }}>
                                         Discount (%)
                                     </TableCell>
                                     <TableCell align="right">
-                                        <TextField 
-                                          size="small" 
-                                          min={0}
-                                          value={discount} 
-                                          label="Discount" 
-                                          style={{ width: 100 }} 
-                                          variant="outlined"
-                                          onChange={ (e) => {
-                                              setDiscount(e.target.value)
-                                          }} />
+                                        <TextField
+                                            size="small"
+                                            min={0}
+                                            value={discount}
+                                            label="Discount"
+                                            style={{ width: 100 }}
+                                            variant="outlined"
+                                            onChange={(e) => {
+                                                setDiscount(e.target.value)
+                                            }} />
                                     </TableCell>
                                 </TableRow>
+                                {charges.map((charge,idx) => {
+                                    return (
+                                    <TableRow key={idx}>
+                                        <TableCell colSpan="3" />
+                                        <TableCell style={{ fontWeight: 500 }}>
+                                           {charge.chargeName}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            {charge.chargeAmount}
+                                        </TableCell>
+                                    </TableRow>
+                                    )
+                                })}
                                 <TableRow >
                                     <TableCell colSpan="3" />
-                                    <TableCell bgcolor="#c1c1c1" style={{fontWeight:500}}>
+                                    <TableCell bgcolor="#c1c1c1" style={{ fontWeight: 500 }}>
                                         Grand Total
                                     </TableCell>
                                     <TableCell bgcolor="#c1c1c1" align="right">
@@ -495,7 +676,7 @@ export default function InvoiceFormLayout(props){
                         color="primary"
                         startIcon={<SaveIcon />}
                         onClick={submitInvoice}
-                        >
+                    >
                         Save Invoice
                     </Button>
                     <Button
@@ -503,11 +684,12 @@ export default function InvoiceFormLayout(props){
                         color="default"
                         startIcon={<RotateLeftIcon />}
                         className={classes.btn}
-                        >
+                        onClick={refreshPage}
+                    >
                         Reset
                     </Button>
                 </Grid>
             </Grid>
         </div>
     )
-} 
+}

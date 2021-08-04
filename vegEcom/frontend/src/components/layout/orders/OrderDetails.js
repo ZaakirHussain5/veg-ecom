@@ -37,6 +37,7 @@ export default function OrderDetails(props) {
     const [deliveryAddress,setDeliveryAddress] = useState("")
     const [orderStatus, setOrderStatus] = useState("Pending")
     const [orderItems, setOrderItems] = useState([]);
+    const [isInvoiceCreated, setIsInvoiceCreated] = useState([]);
     
     const [isLoading, setIsLoading] = useState(false)
     const [isOrderProcessing, setIsOrderProcessing] = useState(false)
@@ -54,6 +55,7 @@ export default function OrderDetails(props) {
             .then(order => {
                 setOrderId(order.orderId)
                 setPhoneNo(order.user.username)
+                setIsInvoiceCreated(order.isInvoiceCreated)
                 setDeliveryAddress(order.shippingAddress.address)
                 setOrderStatus(order.status)
                 
@@ -68,8 +70,8 @@ export default function OrderDetails(props) {
                         unit: orderItem.unit
                     })
                 })
+
                 setOrderItems(newOrderItems)
-                
                 setIsLoading(false)
             })
     }, [props.id])
@@ -213,11 +215,12 @@ export default function OrderDetails(props) {
                                     })}
                                     <TableRow>
                                         <TableCell colSpan="2" align="right">
-                                            <Link to={"/NewInvoice/"+props.id}>
-                                            <Button variant="contained" size="small" className={classes.btn} color="primary">
-                                                Create Invoice
-                                            </Button>
-                                            </Link>
+                                            {!isInvoiceCreated &&
+                                                <Link to={"/NewInvoice/" + props.id}>
+                                                    <Button variant="contained" size="small" className={classes.btn} color="primary">
+                                                        Create Invoice
+                                                    </Button>
+                                                </Link>}
                                         </TableCell>
                                     </TableRow>
                                 </TableBody>

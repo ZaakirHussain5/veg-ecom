@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-export default function Login() {
+export default function Login(props) {
     const classes = useStyles();
     const history = useHistory();
     const [username, setUsername] = useState("");
@@ -86,6 +86,7 @@ export default function Login() {
             setLoading(false)
             console.log(data)
             localStorage.setItem("AdminToken",data.token)
+            props.tokenValidityFunc(true)
             history.push('/')
         }).catch(err=>{
             setLoading(false)

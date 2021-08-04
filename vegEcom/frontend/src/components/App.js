@@ -1,15 +1,20 @@
 import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { HashRouter as Router, Switch, Route, Link ,Redirect } from "react-router-dom"
+import { HashRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom"
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Orders from './pages/Orders'
 import Customers from './pages/Customers'
 import Invoices from './pages/Invoices'
-import InvoiceForm from  './layout/invoices/InvoiceForm'
+import InvoiceForm from './layout/invoices/InvoiceForm'
 import Inventory from './pages/Inventory'
-import ProductMedia from './pages/masters/ProductMedia'
+import ProductMedia from './layout/masters/ProductMedia'
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Backdrop from '@material-ui/core/Backdrop';
+import { makeStyles } from '@material-ui/core/styles';
+import { useLocation } from 'react-router-dom'
+
 
 const theme = createMuiTheme({
     palette: {
@@ -23,8 +28,9 @@ const theme = createMuiTheme({
 });
 
 const App = function () {
-
     var [isTokenValid, setIsTokenValid] = useState(true)
+
+    let location = useLocation();
 
     useEffect(() => {
         const adminToken = localStorage.getItem('AdminToken')
@@ -33,41 +39,123 @@ const App = function () {
             headers: {
                 "Authorization": `Token ${adminToken}`
             }
-        }).then(response=>{
+        }).then(response => {
             setIsTokenValid(response.ok)
-        }).catch(err=>{
-            setIsTokenValid(false)
+        }).catch(err => {
+            setIsLoading(false)
         })
-    },[])
+    }, [location])
+
+    const updateTokenValidity = (status) => {
+        setIsTokenValid(status)
+    }
 
     return (
-        <Router>
+        <div>
             <ThemeProvider theme={theme}>
                 <Switch>
                     <Route path="/Login">
-                        <Login />
+                        <Login tokenValidityFunc={updateTokenValidity} />
                     </Route>
-                    <Route path="/Orders">
-                        <Orders />
-                    </Route>
-                    <Route path="/Customers">
-                        <Customers />
-                    </Route>
-                    <Route path="/Invoices">
-                        <Invoices />
-                    </Route>
-                    <Route path="/NewInvoice/:order">
-                        <InvoiceForm />
-                    </Route>
-                    <Route path="/EditInvoice/:id">
-                        <InvoiceForm />
-                    </Route>
-                    <Route path="/Inventory">
-                        <Inventory />
-                    </Route>
-                    <Route path="/ProductMedia">
-                        <ProductMedia />
-                    </Route>
+                    <Route path="/Orders"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <Orders />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+                    <Route path="/Customers"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <Customers />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+                    <Route path="/Invoices"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <Invoices />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+                    <Route path="/NewInvoice/:order"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <InvoiceForm />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+                    <Route path="/EditInvoice/:id"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <InvoiceForm />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+                    <Route path="/Inventory"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <Inventory />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+
+                    <Route path="/ProductMedia"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <ProductMedia />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
                     <Route exact path="/"
                         render={({ location }) =>
                             isTokenValid ? (
@@ -85,8 +173,13 @@ const App = function () {
 
                 </Switch>
             </ThemeProvider>
-        </Router>
+        </div>
+
     )
 }
 
-ReactDOM.render(<App />, document.querySelector('#app'))
+ReactDOM.render(
+    <Router>
+        <App />
+    </Router>
+    , document.querySelector('#app'))

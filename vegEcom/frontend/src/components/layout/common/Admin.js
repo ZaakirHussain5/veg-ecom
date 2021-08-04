@@ -116,7 +116,7 @@ export default function Admin(props) {
     const history = useHistory();
 
     const LogoutUser = () => {
-        localStorage.setItem('AdminToken','')
+        localStorage.removeItem('AdminToken')
         history.push('/Login')
     }
 
