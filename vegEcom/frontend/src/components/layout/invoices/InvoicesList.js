@@ -17,9 +17,39 @@ export default function InvoicesList() {
     const [rows,setRows] = useState([]);
 
     const [isLoading,setIsLoading] = useState(false)
+    const [from_date, setFromDate] = useState('');
+    const [to_date, setToDate] = useState('');
 
     function createData(id,InvoiceID, date, name, totalAmount, phoneNo) {
         return { id,InvoiceID, date, name, totalAmount, phoneNo };
+    }
+
+    
+    const getOrderData = () =>{
+        let url = '/api/w/invoices/';
+        let params = []
+        if (to_date !== ''){
+            params.push(`to_date=${to_date}`)
+        }
+        if (from_date !== ''){
+            params.push(`from_date=${from_date}`)
+        }
+        const queryParams = params.join('&')
+        if(queryParams !== ''){
+            url = `${url}?${queryParams}`;
+        }
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Token ${localStorage.getItem('AdminToken')}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                setRows(data)
+            })
     }
 
     useEffect(()=>{
@@ -51,22 +81,20 @@ export default function InvoicesList() {
 
 
     const cols = [
-        { field: 'InvoiceID', headerName: 'Invoice #', width: 150 },
-        { field: 'phoneNo', headerName: 'Phone No.', width: 160 },
-        { field: 'date', headerName: 'Invoice Date', width: 170 },
-        { field: 'totalAmount', headerName: 'Bill Amount', width: 200 },
+        { field: 'invoiceID', headerName: 'Invoice Id #', width: 150},
+        { field: 'created_at', headerName: 'Date', width: 170
+        
+        },
+        { field: 'total', headerName: 'Total', width: 200 },
         {
-            field: 'id',
-            headerName: ' ',
-            renderCell: (GridCellParams) => (
-                    <Button
-                        color="primary"
-                        size="small"
-                        onClick={()=>setInvoiceId(GridCellParams.value)}
-                    >
-                        View
-                  </Button>
-            ),
+            field: 'discount',
+            headerName: 'Discount',
+            width: 250
+        },
+        {
+            field: 'grandTotal',
+            headerName: 'Grand Total',
+            width: 250
         },
     ]
 
@@ -113,6 +141,8 @@ export default function InvoicesList() {
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        value={from_date}
+                        onChange={(e)=>setFromDate(e.target.value)}
                     />
                     <TextField
                         size="small"
@@ -124,21 +154,22 @@ export default function InvoicesList() {
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        value={to_date}
+                        onChange={(e)=>setToDate(e.target.value)}
                     />
-                    {isLoading ?
-                        <Skeleton count={12} />
-                        :
-                        <div style={{ height: 400, width: '100%' }}>
-                            <DataGrid
-                                density="compact"
-                                rows={rows}
-                                columns={cols}
-                                pageSize={5}
-                                components={{
-                                    Toolbar: GridToolbar,
-                                }} />
-                        </div>
-                    }
+                    <Button variant="contained" color="primary" onClick={getOrderData}>
+                        Get Invoices
+                    </Button>
+                    <div style={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            density="compact"
+                            rows={rows}
+                            columns={cols}
+                            pageSize={5}
+                            components={{
+                                Toolbar: GridToolbar,
+                            }} />
+                    </div>
                 </div>
             }
         </Fragment>

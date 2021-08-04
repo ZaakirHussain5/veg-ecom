@@ -18,7 +18,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Customers() {
     const classes = useStyles();
-    
     return (
         <Admin>
             <Grid container spacing={3}>

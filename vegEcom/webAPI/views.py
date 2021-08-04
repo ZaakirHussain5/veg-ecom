@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from datetime import date as dateObj
 from rest_framework import viewsets,generics,mixins,permissions
 from knox.models import AuthToken
 from rest_framework.response import Response
@@ -54,20 +55,74 @@ class AdminInvoiceAPI(viewsets.ModelViewSet):
 
     def get_queryset(self):
         self.serializer_class = InvoiceSerializer
-        return Invoice.objects.all().order_by('-created_at')
-    
-    def retrieve(self, request, *args, **kwargs):
-        self.serializer_class = InvoiceSerializer
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-class UpdateInvoiceAPI(viewsets.ModelViewSet):
-    serializer_class = UpdateInvoiceSerializer
-    permission_classes =[permissions.IsAuthenticated]
-
-    
         
+        orders=[]
+        if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
+            if('from_date' in self.request.query_params):
+                from_date = self.request.query_params['from_date']
+                orders = Invoice.objects.filter(created_at__gte=from_date).order_by('-created_at')
+                print(orders)
+            if ('to_date' in self.request.query_params):
+                to_date = self.request.query_params['to_date']
+                orders = Invoice.objects.filter(created_at__lte=to_date).order_by('-created_at')
+                print('d', orders)
+        else: 
+            date = dateObj.today()
+            orders = Invoice.objects.filter(created_at=date).order_by('-created_at')
+        return orders
+        # return Invoice.objects.all().order_by('-created_at')
+
+
+class AdminDueList(mixins.ListModelMixin,viewsets.GenericViewSet):
+    serializer_class = UserTransactionSerializer
+    permission_classes = [
+        permissions.IsAdminUser
+    ]
+
+    def get_queryset(self):
+        
+        orders=[]
+        if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
+            if('from_date' in self.request.query_params):
+                from_date = self.request.query_params['from_date']
+                orders = UserCreditLedger.objects.filter(transactionType="D", transactionDateTime__date__gte=from_date).order_by('-transactionDateTime')
+                print('From date', orders)
+            if ('to_date' in self.request.query_params):
+                to_date = self.request.query_params['to_date']
+                orders = UserCreditLedger.objects.filter(transactionType="D", transactionDateTime__date__lte=to_date).order_by('-transactionDateTime')
+                print('To date', orders)
+        else: 
+            date = dateObj.today()
+            orders = UserCreditLedger.objects.filter(transactionType="D", transactionDateTime__date=date).order_by('-transactionDateTime')
+        return orders
+
+
+class AdminPaymentList(mixins.ListModelMixin,viewsets.GenericViewSet):
+    serializer_class = UserTransactionSerializer
+    permission_classes = [
+        permissions.IsAdminUser
+    ]
+
+    def get_queryset(self):
+        
+        orders=[]
+        if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
+            if('from_date' in self.request.query_params):
+                from_date = self.request.query_params['from_date']
+                orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date__gte=from_date).order_by('-transactionDateTime')
+                print('From date', orders)
+            if ('to_date' in self.request.query_params):
+                to_date = self.request.query_params['to_date']
+                orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date__lte=to_date).order_by('-transactionDateTime')
+                print('To date', orders)
+        else: 
+            date = dateObj.today()
+            orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date=date).order_by('-transactionDateTime')
+        return orders
+        
+
+
+
 
 class UserLedgerAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -102,7 +157,22 @@ class AdminOrderAPI(viewsets.ModelViewSet):
     
     def get_queryset(self):
         self.serializer_class = OrderListSerialiizer
-        return Order.objects.all().order_by('-created_at')
+        date = dateObj.today()
+        orders = []
+        if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
+            if('from_date' in self.request.query_params):
+                from_date = self.request.query_params['from_date']
+                orders = Order.objects.filter(created_at__date__gte=from_date).order_by('-created_at')
+                print('From date', orders)
+            if ('to_date' in self.request.query_params):
+                to_date = self.request.query_params['to_date']
+                orders = orders.filter(created_at__date__lte=to_date).order_by('-created_at')
+                print('To date', orders)
+        else:
+            orders = Order.objects.filter(created_at__date=date).order_by('-created_at')
+        # print(orders)
+        return orders
+        # return Order.objects.all().order_by('-created_at')
 
 class AdminCustomerAPI(viewsets.ModelViewSet):
     serializer_class = UserSerializer

@@ -9,7 +9,10 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Title from '../dashboard/Title'
-import Orders from '../reports/Orders'
+import Orders from '../reports/Orders';
+import CustomerDues from '../reports/CustomerDues';
+import CustomerPayments from '../reports/CustomerPayments';
+import Invoices from '../reports/Invoices';
 
 
 function TabPanel(props) {
@@ -83,13 +86,13 @@ export default function Reports() {
                            <Orders />
                         </TabPanel>
                         <TabPanel value={value} index={1}>
-                            Invoices Comming Soon
+                            <Invoices />
                         </TabPanel>
                         <TabPanel value={value} index={2}>
-                            Payments Comming Soon
+                            <CustomerPayments />
                         </TabPanel>
                         <TabPanel value={value} index={3}>
-                            Dues Comming Soon
+                            <CustomerDues />
                         </TabPanel>
                     </Paper>
                 </Grid>
