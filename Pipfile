@@ -16,6 +16,7 @@ drf-openapi = "*"
 pyyaml = "*"
 xhtml2pdf = "*"
 coreapi = "*"
+arrow = "*"
 
 [requires]
 python_version = "3.6"

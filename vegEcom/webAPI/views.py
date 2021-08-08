@@ -6,11 +6,12 @@ from rest_framework.response import Response
 from django.db.models import Sum
 from decimal import Decimal
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
-from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer
+from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,CreateProductSerializer
 from .models import Invoice,UserCreditLedger
 from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer
-from mobileAPI.models import Order
+from mobileAPI.models import Order,Product
 
 
 def invoice(request):
@@ -70,7 +71,13 @@ class AdminInvoiceAPI(viewsets.ModelViewSet):
             date = dateObj.today()
             orders = Invoice.objects.filter(created_at=date).order_by('-created_at')
         return orders
-        # return Invoice.objects.all().order_by('-created_at')
+    
+    def retrieve(self, request, pk=None):
+        queryset = Invoice.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = InvoiceSerializer(user)
+        return Response(serializer.data)
+        
 
 
 class AdminDueList(mixins.ListModelMixin,viewsets.GenericViewSet):
@@ -172,7 +179,12 @@ class AdminOrderAPI(viewsets.ModelViewSet):
             orders = Order.objects.filter(created_at__date=date).order_by('-created_at')
         # print(orders)
         return orders
-        # return Order.objects.all().order_by('-created_at')
+    
+    def retrieve(self, request, pk=None):
+        queryset = Order.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = OrderListSerialiizer(user)
+        return Response(serializer.data)
 
 class AdminCustomerAPI(viewsets.ModelViewSet):
     serializer_class = UserSerializer
@@ -182,6 +194,11 @@ class AdminCustomerAPI(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return User.objects.filter(is_superuser=False,is_staff=False)
+
+class ProductAPI(viewsets.ModelViewSet):
+    serializer_class = CreateProductSerializer
+    permission_classes=[permissions.IsAdminUser]
+    queryset=Product.objects.all() 
 
 
 

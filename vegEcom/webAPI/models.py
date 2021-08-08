@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Max
+from django.utils import timezone
 from datetime import datetime 
 
 def generateInvoiceID():
@@ -54,14 +55,14 @@ class UserCreditLedger(models.Model):
     description = models.TextField(null=True,blank=True)
     transactionType = models.CharField(max_length=1,default='D')
     amount = models.DecimalField(max_digits=10,decimal_places=2)
-    transactionDateTime = models.DateTimeField(auto_now_add=True)
+    transactionDateTime = models.DateTimeField(default=timezone.now)
 
     @property
     def formattedTransactionDateTime(self):
-        return datetime.strftime(self.transactionDateTime,"%Y-%m-%d %I:%M %p")
+        return self.transactionDateTime
 
     def __str__(self):
-        return self.user.username + self.transactionType
+        return self.user.username + self.transactionType + ' ' + str(self.transactionDateTime)
     
 class ServiceLocation(models.Model):
     pincode = models.CharField(max_length=10)

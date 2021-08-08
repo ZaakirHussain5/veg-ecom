@@ -108,7 +108,7 @@ export default function Orders() {
                 density="compact"
                 rows={rows}
                 columns={cols}
-                pageSize={5}
+                pageSize={10}
                 components={{
                     Toolbar: GridToolbar,
                 }} />

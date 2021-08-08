@@ -20,10 +20,6 @@ export default function InvoicesList() {
     const [from_date, setFromDate] = useState('');
     const [to_date, setToDate] = useState('');
 
-    function createData(id,InvoiceID, date, name, totalAmount, phoneNo) {
-        return { id,InvoiceID, date, name, totalAmount, phoneNo };
-    }
-
     
     const getOrderData = () =>{
         let url = '/api/w/invoices/';
@@ -63,14 +59,7 @@ export default function InvoicesList() {
                 throw Error("Error Occured")
             return response.json()
         }).then(invoices => {
-            var newInvoicesList = []
-            invoices.map(invoice => {                    
-                var single = createData(invoice.id,invoice.invoiceID,invoice.created_at,invoice.user.first_name,invoice.grandTotal,invoice.user.username)
-                newInvoicesList.push(
-                    single
-                )
-            })
-            setRows(newInvoicesList)
+            setRows(invoices)
             setIsLoading(false)
         }).catch(err => {
             console.log(err)
@@ -85,16 +74,29 @@ export default function InvoicesList() {
         { field: 'created_at', headerName: 'Date', width: 170
         
         },
-        { field: 'total', headerName: 'Total', width: 200 },
+        { field: 'total', headerName: 'Total', width: 160 },
         {
             field: 'discount',
             headerName: 'Discount',
-            width: 250
+            width: 160
         },
         {
             field: 'grandTotal',
             headerName: 'Grand Total',
-            width: 250
+            width: 160
+        },
+        {
+            field: 'id',
+            headerName: ' ',
+            renderCell: (GridCellParams) => (
+                <Button
+                    color="primary"
+                    size="small"
+                    onClick={() => setInvoiceId(GridCellParams.value)}
+                >
+                    View
+                </Button>
+            ),
         },
     ]
 
@@ -160,16 +162,20 @@ export default function InvoicesList() {
                     <Button variant="contained" color="primary" onClick={getOrderData}>
                         Get Invoices
                     </Button>
-                    <div style={{ height: 400, width: '100%' }}>
-                        <DataGrid
-                            density="compact"
-                            rows={rows}
-                            columns={cols}
-                            pageSize={5}
-                            components={{
-                                Toolbar: GridToolbar,
-                            }} />
-                    </div>
+                    {isLoading ?
+                        <Skeleton count={12} />
+                            :
+                            <div style={{ height: 400, width: '100%' }}>
+                                <DataGrid
+                                    density="compact"
+                                    rows={rows}
+                                    columns={cols}
+                                    pageSize={10}
+                                    components={{
+                                        Toolbar: GridToolbar,
+                                    }} />
+                            </div> 
+                    }
                 </div>
             }
         </Fragment>

@@ -12,7 +12,7 @@ export default function CustomerDues() {
     const [to_date, setToDate] = useState('')
 
     const getOrderData = () =>{
-        let url = '/api/w/payments/';
+        let url = '/api/w/dues/';
         let params = []
         if (to_date !== ''){
             params.push(`to_date=${to_date}`)
@@ -47,7 +47,7 @@ export default function CustomerDues() {
 
     const cols = [
         { field: 'refId', headerName: 'RefId #', width: 150},
-        { field: 'description', headerName: 'Description', width: 170
+        { field: 'description', headerName: 'Description', width: 350
         
         },
         { field: 'amount', headerName: 'Amount', width: 200
@@ -55,6 +55,7 @@ export default function CustomerDues() {
         {
             field: 'formattedTransactionDateTime',
             headerName: 'Date'
+            , width: 200
         },
     ]
 
@@ -96,7 +97,7 @@ export default function CustomerDues() {
                 density="compact"
                 rows={rows}
                 columns={cols}
-                pageSize={5}
+                pageSize={10}
                 components={{
                     Toolbar: GridToolbar,
                 }} />

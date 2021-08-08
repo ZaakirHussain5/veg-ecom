@@ -125,7 +125,7 @@ export default function Users() {
     <React.Fragment>
       <Title>Users</Title>
       <div style={{ height: 400, width: '100%' }}>
-        <DataGrid rows={rows} columns={cols} pageSize={5} checkboxSelection />
+        <DataGrid rows={rows} columns={cols} pageSize={10} checkboxSelection />
       </div>
       <div className={classes.seeMore}>
         <Button color="primary" variant="contained" onClick={handleClickOpen}>

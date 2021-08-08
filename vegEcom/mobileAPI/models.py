@@ -27,14 +27,9 @@ class Type(models.Model):
     rPrice = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
     gPrice = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
     hPrice = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
-    stockUnit = models.CharField(max_length=20)
-    rPriceUnit = models.CharField(max_length=20,default="",blank=True)
-    gPriceUnit = models.CharField(max_length=20,default="",blank=True)
-    hPriceUnit = models.CharField(max_length=20,default="",blank=True)
     rPriceQuantity = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
     gPriceQuantity = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
     hPriceQuantity = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
-    purchaseUnit = models.CharField(max_length=20)
     avlQty = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
 
     created_at = models.DateField(auto_now_add=True)
@@ -42,19 +37,19 @@ class Type(models.Model):
 
     @property
     def RestrauntPrice(self):
-        return str(self.rPrice) + ' Per ' + str(self.rPriceQuantity) + ' ' + self.rPriceUnit 
+        return str(self.rPrice) + ' / ' + str(self.rPriceQuantity) + ' KGS' 
 
     @property
     def GeneralStorePrice(self):
-        return str(self.gPrice) + ' Per ' + str(self.gPriceQuantity) + ' ' + self.gPriceUnit 
+        return str(self.gPrice) + ' / ' + str(self.gPriceQuantity) + ' KGS' 
 
     @property
     def HouseHoldPrice(self):
-        return str(self.hPrice) + ' Per ' + str(self.hPriceQuantity) + ' ' + self.hPriceUnit 
+        return str(self.hPrice) + ' / ' + str(self.hPriceQuantity) + ' KGS' 
 
     @property
     def AvailableQty(self):
-        return str(self.avlQty) + ' ' + self.stockUnit 
+        return str(self.avlQty) + ' KGS' 
 
     def __str__(self):
         return self.name

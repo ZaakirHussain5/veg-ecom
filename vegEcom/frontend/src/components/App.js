@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from 'react'
+import React, { useEffect, useState , useRef  } from 'react'
 import ReactDOM from 'react-dom'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { HashRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom"
@@ -10,9 +10,7 @@ import Invoices from './pages/Invoices'
 import InvoiceForm from './layout/invoices/InvoiceForm'
 import Inventory from './pages/Inventory'
 import ProductMedia from './layout/masters/ProductMedia'
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Backdrop from '@material-ui/core/Backdrop';
-import { makeStyles } from '@material-ui/core/styles';
+import LoadingBar from 'react-top-loading-bar'
 import { useLocation } from 'react-router-dom'
 
 
@@ -30,9 +28,12 @@ const theme = createMuiTheme({
 const App = function () {
     var [isTokenValid, setIsTokenValid] = useState(true)
 
+    const ref = useRef(null)
+
     let location = useLocation();
 
     useEffect(() => {
+        ref.current.continuousStart()
         const adminToken = localStorage.getItem('AdminToken')
         fetch('/api/GetUser', {
             "method": "GET",
@@ -41,8 +42,9 @@ const App = function () {
             }
         }).then(response => {
             setIsTokenValid(response.ok)
+            ref.current.complete()
         }).catch(err => {
-            setIsLoading(false)
+            ref.current.complete()
         })
     }, [location])
 
@@ -53,6 +55,7 @@ const App = function () {
     return (
         <div>
             <ThemeProvider theme={theme}>
+            <LoadingBar color='#E21717' ref={ref} />
                 <Switch>
                     <Route path="/Login">
                         <Login tokenValidityFunc={updateTokenValidity} />

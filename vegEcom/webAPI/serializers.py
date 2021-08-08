@@ -5,7 +5,7 @@ from django.db.models import Sum
 
 from .models import Invoice,InvoiceItem,UserCreditLedger,ServiceLocation,InvoiceCharges 
 from mobileAPI.serializers import UserSerializer
-from mobileAPI.models import Order
+from mobileAPI.models import Order,Product,Type
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,7 +58,7 @@ class CreateInvoiceSerializer(serializers.ModelSerializer):
         user.save()
         invoice = Invoice.objects.create(user=user,**validated_data)
         if invoice.balance:
-            UserCreditLedger.objects.create(refId=invoice.invoiceID,description="Amount Due Towards Bill# "+invoice.invoiceID,amount=invoice.balance)
+            UserCreditLedger.objects.create(user=user,refId=invoice.invoiceID,description="Amount Due Towards Bill# "+invoice.invoiceID,amount=invoice.balance)
         for invoice_item in invoice_items:
             InvoiceItem.objects.create(invoice=invoice, **invoice_item)
         for invoice_charge in invoice_charges:
@@ -93,7 +93,7 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
         InvoiceCharges.objects.filter(invoice=invoice).delete()
 
         if invoice.balance:
-            UserCreditLedger.objects.create(refId=invoice.invoiceID,description="Amount Due Towards Bill# "+invoice.invoiceID,amount=invoice.balance)
+            UserCreditLedger.objects.create(user=user,refId=invoice.invoiceID,description="Amount Due Towards Bill# "+invoice.invoiceID,amount=invoice.balance)
         for invoice_item in invoice_items:
             InvoiceItem.objects.create(invoice=invoice, **invoice_item)
         for invoice_charge in invoice_charges:
@@ -125,3 +125,27 @@ class ServiceLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceLocation
         fields = '__all__'
+
+class ProductTypeSeraizer(serializers.ModelSerializer):
+    class Meta:
+        model = Type
+        fields=('id','name','rPrice','gPrice','hPrice','rPriceQuantity','gPriceQuantity','hPriceQuantity','avlQty')
+
+class CreateProductSerializer(serializers.ModelSerializer):
+    types=ProductTypeSeraizer(many=True,read_only=True)
+    typesJson = serializers.JSONField(write_only=True)
+
+    def create(self,validated_data):
+        productTypes = validated_data.pop('typesJson')
+        product = Product.objects.create(**validated_data)
+
+        for pt in productTypes["types"]:
+            productType = Type.objects.create(**pt)
+            product.types.add(productType)
+        
+        return product
+
+    class Meta:
+        model = Product
+        fields = ('id','image','name','description','types','typesJson')
+
