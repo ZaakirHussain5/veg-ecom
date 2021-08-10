@@ -117,11 +117,9 @@ class AdminPaymentList(mixins.ListModelMixin,viewsets.GenericViewSet):
             if('from_date' in self.request.query_params):
                 from_date = self.request.query_params['from_date']
                 orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date__gte=from_date).order_by('-transactionDateTime')
-                print('From date', orders)
             if ('to_date' in self.request.query_params):
                 to_date = self.request.query_params['to_date']
                 orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date__lte=to_date).order_by('-transactionDateTime')
-                print('To date', orders)
         else: 
             date = dateObj.today()
             orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date=date).order_by('-transactionDateTime')

@@ -6,10 +6,10 @@ import TextField from '@material-ui/core/TextField';
 
 export default function CustomerDues() {
     const date = new Date();
-    const todayDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`
+    const todayDate = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
     const [rows, setRows] = useState([]);
-    const [from_date, setFromDate] = useState('');
-    const [to_date, setToDate] = useState('')
+    const [from_date, setFromDate] = useState(todayDate);
+    const [to_date, setToDate] = useState(todayDate)
 
     const getOrderData = () =>{
         let url = '/api/w/dues/';
