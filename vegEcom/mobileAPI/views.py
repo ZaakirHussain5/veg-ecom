@@ -90,9 +90,14 @@ def changeDeleiveryType(request):
         return Response({
             "type":"This field is Required"
         },status=status.HTTP_400_BAD_REQUEST)
+    if request.data.get('name') is None:
+        return Response({
+            "name":"This field is Required"
+        },status=status.HTTP_400_BAD_REQUEST)
     try:
         dt = request.user.DeliveryType
         dt.deliveryType = request.data.get('type')
+        dt.name = request.data.get('name')
         dt.save()
     except DeliveryType.DoesNotExist:
         dt = DeliveryType.objects.create(user=request.user,deliveryType=request.data.get('type'))

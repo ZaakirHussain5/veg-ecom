@@ -6,6 +6,7 @@ from datetime import datetime
 class DeliveryType(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="DeliveryType")
     deliveryType = models.CharField(max_length=1)
+    name = models.CharField(max_length=120)
 
     def __str__(self):
         return self.user.username + self.deliveryType
@@ -156,11 +157,11 @@ class Order(models.Model):
 
     @property
     def formattedCreatedAt(self):
-        return datetime.strftime(self.created_at,"%Y-%m-%d %I:%M %p")
+        return self.created_at    
     
     @property
     def formattedUpdatedAt(self):
-        return datetime.strftime(self.updated_at,"%Y-%m-%d %I:%M %p")
+        return self.updated_at                 
 
     def __str__(self):
         return self.orderId
