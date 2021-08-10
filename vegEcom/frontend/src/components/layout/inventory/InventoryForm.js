@@ -1,9 +1,8 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState , useEffect} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Title from '../dashboard/Title';
 import Typography from '@material-ui/core/Typography';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SaveIcon from '@material-ui/icons/Save';
 import Table from '@material-ui/core/Table';
@@ -16,8 +15,12 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button'
 import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Backdrop from '@material-ui/core/Backdrop';
 
 const useStyles = makeStyles((theme) => ({
     input: {
@@ -37,11 +40,21 @@ const useStyles = makeStyles((theme) => ({
         marginRight:"15px",
         fontSize:"20px",
     },
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: 'primary',
+    },
 }));
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 export default function InventoryForm(props) {
     const classes = useStyles();
-    const [displayImage,setDisPlayImage] = useState("/static/images/vegetables.png") 
+    const [displayImage,setDisplayImage] = useState("/static/images/vegetables.png") 
+
+    const [productId,setProductId]  = useState(props.id)
 
     const [productImage,setProductImage] = useState(null)
     const [productName,setProductName] = useState("")
@@ -67,11 +80,53 @@ export default function InventoryForm(props) {
     const [avlQty,setAvlQty] = useState(0.00)
     const [avlQtyError,setAvlQtyError] = useState(false)
 
+    const [isLoading, setIsLoading] = useState(false)
+    const [isAlert, setIsAlert] = useState(false)
+    const [alert, setAlert] = useState({
+        message: "", color: "success"
+    })
+
+    const [submitUrl,setSubmitUrl] = useState("/api/w/products/")
+
+    useEffect(()=>{
+        if(productId && productId != -1){
+            setIsLoading(true)
+            fetch(`/api/w/product/${productId}`,{
+                headers:{
+                    "Authorization":`Token ${localStorage.getItem("AdminToken")}`
+                }
+            })
+            .then(res => res.json())
+            .then(product => {
+                setSubmitUrl("/api/w/UpdateProduct")
+                setDisplayImage(product.image)
+                setProductName(product.name)
+                setProductDescription(product.description)
+                var productTypesList = []
+                product.types.map(type => {
+                    productTypesList.push({
+                        typeName:type.name,
+                        rPrice:type.rPrice,
+                        gPrice:type.gPrice,
+                        hPrice:type.hPrice,
+                        rQty:type.rPriceQuantity,
+                        gQty:type.gPriceQuantity,
+                        hQty:type.hPriceQuantity,
+                        avlQty:type.avlQty,
+                    })
+                })
+                setProductTypes(productTypesList)
+                setIsLoading(false)
+            })
+        }    
+    },[productId])
+    
+
     const onFileInputChange = function(e){
         var file = e.target.files[0]
         var reader = new FileReader()
         reader.onload = function(e){
-            setDisPlayImage(e.target.result)
+            setDisplayImage(e.target.result)
         }
         reader.readAsDataURL(file);
         setProductImage(file)
@@ -121,8 +176,15 @@ export default function InventoryForm(props) {
             errorCount++
         }
 
-        if(errorCount)
+        if(errorCount){
+            setAlert({
+                color:"error",
+                message:"Error! Please Fill all the required fields."
+            })
+            setIsAlert(true)
             return
+        }
+            
 
         var productTypesList = productTypes.concat({
             typeName,rPrice,rQty,gPrice,gQty,hPrice,hQty,avlQty
@@ -137,6 +199,7 @@ export default function InventoryForm(props) {
         setGQty(0.00)
         setHQty(0.00)
         setAvlQty(0.00)
+        setDisplayImage("/static/images/vegetables.png")
     }
 
     const removeItem = function(index){
@@ -158,8 +221,32 @@ export default function InventoryForm(props) {
             errorCount++
         }
 
-        if(errorCount)
+        if(errorCount){
+            setAlert({
+                color:"error",
+                message:"Error! Please Fill all the required fields."
+            })
+            setIsAlert(true)
             return
+        }
+        
+        if(!productImage){
+            setAlert({
+                color:"error",
+                message:"Error! Please upload an image for the product."
+            })
+            setIsAlert(true)
+            return
+        }
+        
+        if(!productTypes.length){
+            setAlert({
+                color:"error",
+                message:"Error! Add Atleast one product Type."
+            })
+            setIsAlert(true)
+            return
+        }
 
         let productTypesList = []
         productTypes.map(({typeName,rPrice,gPrice,hPrice,rQty,gQty,hQty,avlQty}) => {
@@ -183,7 +270,8 @@ export default function InventoryForm(props) {
             types:productTypesList
         }))
         
-        fetch('/api/w/product/',{
+        setIsLoading(true)
+        fetch(submitUrl,{
             method:"POST",
             body:productData,
             headers:{
@@ -194,12 +282,29 @@ export default function InventoryForm(props) {
         .then(data => {
             setProductName("")
             setProductDescription("")
+            setIsLoading(false)
             setProductTypes([])
         })
     }
 
+    const handleAlertClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setIsAlert(false);
+    };
+
     return (
         <Fragment>
+            <Snackbar open={isAlert} anchorOrigin={{ vertical: "top", horizontal: "center" }} autoHideDuration={6000} onClose={handleAlertClose}>
+                <Alert onClose={handleAlertClose} severity={alert.color}>
+                    {alert.message}
+                </Alert>
+            </Snackbar>
+            <Backdrop className={classes.backdrop} open={isLoading} >
+                <CircularProgress color="inherit" />
+            </Backdrop>
             <Grid container spacing={3}>
                 <Grid item xl={12} md={12} sm={12}>
                     {props.id == -1 ?
@@ -455,9 +560,6 @@ export default function InventoryForm(props) {
                                                 {productType.avlQty} KGS
                                             </TableCell>
                                             <TableCell>
-                                                <IconButton size="small" color="primary" aria-label="delete">
-                                                    <EditIcon fontSize="small" />
-                                                </IconButton>
                                                 <IconButton size="small" color="secondary" aria-label="delete" onClick={
                                                     ()=>{
                                                         removeItem(productTypes.indexOf(productType))

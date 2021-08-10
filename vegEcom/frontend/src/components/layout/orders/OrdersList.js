@@ -60,14 +60,8 @@ export default function OrdersList() {
             .then(response => response.json())
             .then(data => {
                 var ordersList = data
-                var newOrdersList = []
-                ordersList.map(order => {
-                    newOrdersList.push(
-                        createData(order.id, order.orderId, order.formattedCreatedAt, order.shippingAddress.address, order.user.username)
-                    )
-                })
 
-                setRows(newOrdersList)
+                setRows(data)
                 setIsLoading(false)
             })
     }, [orderId])

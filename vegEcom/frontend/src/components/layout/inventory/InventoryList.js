@@ -21,6 +21,7 @@ import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import Avatar from '@material-ui/core/Avatar';
+import Skeleton from 'react-loading-skeleton';
 
 const useRowStyles = makeStyles((theme) => ({
     root: {
@@ -35,7 +36,7 @@ const useRowStyles = makeStyles((theme) => ({
 }));
 
 function Row(props) {
-    const { row , editItemFunc } = props;
+    const { row, editItemFunc } = props;
     const [open, setOpen] = useState(false);
     const classes = useRowStyles();
 
@@ -48,14 +49,14 @@ function Row(props) {
                     </IconButton>
                 </TableCell>
                 <TableCell component="th" scope="row">
-                <Avatar alt="Product Image" src={row.image} className={classes.large} />
+                    <Avatar alt="Product Image" src={row.image} className={classes.large} />
                 </TableCell>
                 <TableCell component="th" scope="row">
                     {row.name}
                 </TableCell>
                 <TableCell>
                     <IconButton size="small" color="primary" aria-label="edit" onClick={
-                        ()=> editItemFunc(row.id)
+                        () => editItemFunc(row.id)
                     }>
                         <EditIcon fontSize="small" />
                     </IconButton>
@@ -133,7 +134,7 @@ export default function InventoryList() {
                 setRows(products)
                 setIsLoading(false)
             })
-    }, [itemId])
+    }, [])
 
     const editItem = (id) => {
         setItemId(id)
@@ -171,30 +172,34 @@ export default function InventoryList() {
                             </Button>
                         </Box>
                     </Box>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell />
-                                    <TableCell>
-                                        Image
-                                    </TableCell>
-                                    <TableCell>
-                                        Product Name
-                                    </TableCell>
-                                    <TableCell>
-                                        Actions
-                                    </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rows.map((row, idx) => (
-                                    <Row key={idx} row={row} editItemFunc={editItem} />
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
 
+                    {isLoading ?
+                        <Skeleton count={12} />
+                        :
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell />
+                                        <TableCell>
+                                            Image
+                                        </TableCell>
+                                        <TableCell>
+                                            Product Name
+                                        </TableCell>
+                                        <TableCell>
+                                            Actions
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {rows.map((row, idx) => (
+                                        <Row key={idx} row={row} editItemFunc={editItem} />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    }
                 </div>
             }
         </Fragment>
