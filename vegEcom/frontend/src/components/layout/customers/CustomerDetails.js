@@ -40,7 +40,7 @@ export default function CustomerDetails(props) {
             return response.json()
         })
         .then(data => {
-            setCustomerName(data.first_name+' '+data.last_name)
+            setCustomerName(data.fullName)
             setCustomerPhoneNo(data.username)
             setCustomerRegDate(data.date_joined)
 

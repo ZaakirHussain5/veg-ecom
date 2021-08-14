@@ -131,12 +131,50 @@ class ProductTypeSeraizer(serializers.ModelSerializer):
         model = Type
         fields=('id','name','rPrice','gPrice','hPrice','rPriceQuantity','gPriceQuantity','hPriceQuantity','avlQty')
 
-class CreateProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     types=ProductTypeSeraizer(many=True,read_only=True)
     typesJson = serializers.JSONField(write_only=True)
 
     def create(self,validated_data):
         productTypes = validated_data.pop('typesJson')
+        product = Product.objects.create(**validated_data)
+
+        for pt in productTypes["types"]:
+            productType = Type.objects.create(**pt)
+            product.types.add(productType)
+        
+        return product
+    
+    def update(self,instance,validated_data):
+        productTypes = validated_data.pop("typesJson")
+        for attr,value in validated_data.items():
+            if attr == "image" and value is not None:
+                setattr(instance,attr,value)
+        
+        instance.types.all().delete()
+
+        for pt in productTypes["types"]:
+            productType = Type.objects.create(**pt)
+            instance.types.add(productType)
+        
+        instance.save()
+        return instance
+
+    class Meta:
+        model = Product
+        fields = ('id','image','name','description','types','typesJson')
+
+class UpdateProductSerializer(serializers.ModelSerializer):
+    types=ProductTypeSeraizer(many=True,read_only=True)
+    typesJson = serializers.JSONField(write_only=True)
+    id = serializers.IntegerField()
+
+    def create(self,validated_data):
+        id = validated_data.pop('id')
+        productTypes = validated_data.pop('typesJson')
+        product =Product.objects.get(id=id)
+        product.types.all().delete()
+        product.delete()
         product = Product.objects.create(**validated_data)
 
         for pt in productTypes["types"]:

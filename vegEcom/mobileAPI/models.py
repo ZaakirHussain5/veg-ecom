@@ -63,7 +63,7 @@ class ProductMedia(models.Model):
         return self.mediaType
 
 class Product(models.Model):
-    image =  models.ImageField(upload_to='category/')
+    image =  models.ImageField(upload_to='category/',null=True)
     name = models.CharField(max_length=120)
     description = models.TextField(null=True,blank=True)
     types = models.ManyToManyField(Type,related_name="productTypes")

@@ -8,7 +8,7 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,CreateProductSerializer
+from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer
 from .models import Invoice,UserCreditLedger
 from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer
 from mobileAPI.models import Order,Product
@@ -194,9 +194,10 @@ class AdminCustomerAPI(viewsets.ModelViewSet):
         return User.objects.filter(is_superuser=False,is_staff=False)
 
 class ProductAPI(viewsets.ModelViewSet):
-    serializer_class = CreateProductSerializer
+    serializer_class = ProductSerializer
     permission_classes=[permissions.IsAdminUser]
     queryset=Product.objects.all() 
+
 
 
 

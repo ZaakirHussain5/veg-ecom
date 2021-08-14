@@ -22,6 +22,18 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import Avatar from '@material-ui/core/Avatar';
 import Skeleton from 'react-loading-skeleton';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const useRowStyles = makeStyles((theme) => ({
     root: {
@@ -36,7 +48,7 @@ const useRowStyles = makeStyles((theme) => ({
 }));
 
 function Row(props) {
-    const { row, editItemFunc } = props;
+    const { row, editItemFunc , deleteItemFunc} = props;
     const [open, setOpen] = useState(false);
     const classes = useRowStyles();
 
@@ -60,7 +72,9 @@ function Row(props) {
                     }>
                         <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" color="secondary" aria-label="delete">
+                    <IconButton size="small" color="secondary" aria-label="delete" onClick={
+                        () => deleteItemFunc(row.id)
+                    }>
                         <DeleteIcon fontSize="small" />
                     </IconButton>
                 </TableCell>
@@ -118,11 +132,22 @@ function Row(props) {
 export default function InventoryList() {
 
     const [itemId, setItemId] = useState(0)
+    const [deleteItemId, setDeleteItemId] = useState(0)
 
     const [rows, setRows] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+    const [isAlert, setIsAlert] = useState(false)
+    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [alert, setAlert] = useState({
+        message: "", color: "success"
+    })
 
     useEffect(() => {
+        loadProducts()
+    }, [])
+
+    const loadProducts = function () {
         setIsLoading(true)
         fetch('/api/w/product/', {
             headers: {
@@ -134,11 +159,38 @@ export default function InventoryList() {
                 setRows(products)
                 setIsLoading(false)
             })
-    }, [])
+    }
 
     const editItem = (id) => {
         setItemId(id)
     }
+
+    const deleteItem = (id) => {
+        setDeleteItemId(id)
+        setConfirmOpen(true)
+    }
+    
+    const confirmDelete = () => {
+        setIsDeleteLoading(true)
+        setTimeout(()=>{
+            setIsDeleteLoading(false)
+            setAlert({
+                color:"success",
+                message:"Product Deleted Successfully!"
+            })
+            setIsAlert(true)
+            setConfirmOpen(false)
+            loadProducts()
+        },2000)
+    }
+
+    const handleAlertClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setIsAlert(false);
+    };
 
     return (
         <Fragment>
@@ -156,6 +208,32 @@ export default function InventoryList() {
                 </div>
                 :
                 <div>
+                    <Snackbar open={isAlert} anchorOrigin={{ vertical: "top", horizontal: "center" }} autoHideDuration={6000} onClose={handleAlertClose}>
+                        <Alert onClose={handleAlertClose} severity={alert.color}>
+                            {alert.message}
+                        </Alert>
+                    </Snackbar>
+                    <Dialog
+                        fullWidth
+                        maxWidth="xs"
+                        open={confirmOpen}
+                        onClose={() => setConfirmOpen(false)}
+                        aria-labelledby="max-width-dialog-title"
+                    >
+                        <DialogContent>
+                            <DialogContentText>
+                                Are You Sure Delete the Product permenantly?
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button color="primary" variant="contained" onClick={confirmDelete}>
+                                {isDeleteLoading ? <CircularProgress size={24} color="#fff" /> : "Yes" }
+                            </Button>
+                            <Button onClick={() => setConfirmOpen(false)} color="secondary" variant="contained">
+                                No
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                     <Box display="flex" p={1} bgcolor="background.paper">
                         <Box flexGrow={1}>
                             <Title>Inventory List</Title>
@@ -194,7 +272,7 @@ export default function InventoryList() {
                                 </TableHead>
                                 <TableBody>
                                     {rows.map((row, idx) => (
-                                        <Row key={idx} row={row} editItemFunc={editItem} />
+                                        <Row key={idx} row={row} editItemFunc={editItem} deleteItemFunc={deleteItem} />
                                     ))}
                                 </TableBody>
                             </Table>

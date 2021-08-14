@@ -100,7 +100,7 @@ def changeDeleiveryType(request):
         dt.name = request.data.get('name')
         dt.save()
     except DeliveryType.DoesNotExist:
-        dt = DeliveryType.objects.create(user=request.user,deliveryType=request.data.get('type'))
+        dt = DeliveryType.objects.create(user=request.user,deliveryType=request.data.get('type'),name=request.data.get('name'))
     return Response({
         "message":"Delivery Type Updated Successfully"
     }) 

@@ -13,16 +13,24 @@ class DeliveryTypeSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     deliveryType = serializers.SerializerMethodField(method_name="getDeliveryType")
+    fullName = serializers.SerializerMethodField(method_name="getFullName")
 
     class Meta:
         model = User
-        fields = ('id','username','first_name','last_name','email','is_active','deliveryType','date_joined')
+        fields = ('id','username','first_name','last_name','email','is_active','deliveryType','fullName','date_joined')
 
     def getDeliveryType(self,obj):
         try:
             result = DeliveryType.objects.get(user=obj).deliveryType
         except DeliveryType.DoesNotExist:
             result = "R"
+        return result
+    
+    def getFullName(self,obj):
+        try:
+            result = DeliveryType.objects.get(user=obj).name
+        except DeliveryType.DoesNotExist:
+            result = "Unnamed"
         return result
 
 class UserLogin(serializers.Serializer):
@@ -110,7 +118,6 @@ class OrderSerializer(serializers.ModelSerializer):
         items_validated_data = validated_data.pop('items')
         order = Order(**validated_data)
         order.save()
-        items_serializer = self.fields['items']
         for each in items_validated_data:
             item = OrderItem.objects.create(**each)
             order.items.add(item)

@@ -145,7 +145,7 @@ export default function Login(props) {
                             className={classes.submit}
                             onClick={LoginUser}
                         >
-                            {loading ? <CircularProgress size={24} color="#fff" /> : "Sign in" }
+                            {loading ? <CircularProgress size={24} /> : "Sign in" }
                       </Button>
                         <Grid container>
                             <Grid item xs>

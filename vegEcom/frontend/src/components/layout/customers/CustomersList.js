@@ -32,7 +32,7 @@ export default function CutomersList() {
             var newCustomersList = []
             customers.map(customer => {
                 newCustomersList.push(
-                    createData(customer.id,customer.first_name+' '+customer.last_name,customer.date_joined,customer.username)
+                    createData(customer.id,customer.fullName,customer.date_joined,customer.username)
                 )
             })
             setRows(newCustomersList)

@@ -14,6 +14,7 @@ urlpatterns = [
     path('', include('frontend.urls')),
     path('api/', include('mobileAPI.urls')),
     path('api/', include('webAPI.urls')),
+    path('api/', include('suppliers.urls')),
     path('docs/', include_docs_urls(title='VegBags API')),
 ]
 

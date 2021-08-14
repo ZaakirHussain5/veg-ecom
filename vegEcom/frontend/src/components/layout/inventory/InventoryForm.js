@@ -86,7 +86,8 @@ export default function InventoryForm(props) {
         message: "", color: "success"
     })
 
-    const [submitUrl,setSubmitUrl] = useState("/api/w/products/")
+    const [submitUrl,setSubmitUrl] = useState("/api/w/product/")
+    const [submitMethod,setSubmitMethod] = useState("POST")
 
     useEffect(()=>{
         if(productId && productId != -1){
@@ -98,8 +99,9 @@ export default function InventoryForm(props) {
             })
             .then(res => res.json())
             .then(product => {
-                setSubmitUrl("/api/w/UpdateProduct")
-                setDisplayImage(product.image)
+                setSubmitUrl(`/api/w/product/${productId}/`)
+                setSubmitMethod("PUT")
+                setDisplayImage(product.image || "/static/images/vegetables.png")
                 setProductName(product.name)
                 setProductDescription(product.description)
                 var productTypesList = []
@@ -230,13 +232,15 @@ export default function InventoryForm(props) {
             return
         }
         
-        if(!productImage){
-            setAlert({
-                color:"error",
-                message:"Error! Please upload an image for the product."
-            })
-            setIsAlert(true)
-            return
+        if (!productId && productId == -1) {
+            if (!productImage) {
+                setAlert({
+                    color: "error",
+                    message: "Error! Please upload an image for the product."
+                })
+                setIsAlert(true)
+                return
+            }
         }
         
         if(!productTypes.length){
@@ -263,7 +267,11 @@ export default function InventoryForm(props) {
         })
 
         let productData = new FormData()
-        productData.append("image",productImage,productImage.name)
+        if (productId && productId != -1) {
+            productData.append("id", productId)
+        }
+        if(productImage)
+            productData.append("image",productImage,productImage.name)
         productData.append("name",productName)
         productData.append("description",productDescription)
         productData.append("typesJson",JSON.stringify({
@@ -272,7 +280,7 @@ export default function InventoryForm(props) {
         
         setIsLoading(true)
         fetch(submitUrl,{
-            method:"POST",
+            method:submitMethod,
             body:productData,
             headers:{
                 "Authorization":`Token ${localStorage.getItem("AdminToken")}`
@@ -280,10 +288,19 @@ export default function InventoryForm(props) {
         })
         .then(res => res.json())
         .then(data => {
-            setProductName("")
-            setProductDescription("")
+            setAlert({
+                color:"success",
+                message:"Product Saved Successfully"
+            })
+            setIsAlert(true)
             setIsLoading(false)
-            setProductTypes([])
+            if (!productId && productId == -1) {
+                setProductName("")
+                setProductDescription("")
+                setProductTypes([])
+            }else{
+                setProductId(data.id)
+            }
         })
     }
 
@@ -548,13 +565,13 @@ export default function InventoryForm(props) {
                                                 {productType.typeName}
                                             </TableCell>
                                             <TableCell>
-                                                {productType.rPrice}/{rQty}KGS
+                                                {productType.rPrice}/{productType.rQty}KGS
                                             </TableCell>
                                             <TableCell>
-                                                {productType.gPrice}/{gQty}KGS
+                                                {productType.gPrice}/{productType.gQty}KGS
                                             </TableCell>
                                             <TableCell>
-                                                {productType.hPrice}/{hQty}KGS
+                                                {productType.hPrice}/{productType.hQty}KGS
                                             </TableCell>
                                             <TableCell>
                                                 {productType.avlQty} KGS
