@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.db.models import Sum
 
 from .models import Invoice,InvoiceItem,UserCreditLedger,ServiceLocation,InvoiceCharges 
-from mobileAPI.serializers import UserSerializer
+from mobileAPI.serializers import UserSerializer,ProductMediaSerializer
 from mobileAPI.models import Order,Product,Type
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
@@ -134,6 +134,7 @@ class ProductTypeSeraizer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     types=ProductTypeSeraizer(many=True,read_only=True)
     typesJson = serializers.JSONField(write_only=True)
+    media = ProductMediaSerializer(read_only=True,many=True)
 
     def create(self,validated_data):
         productTypes = validated_data.pop('typesJson')
@@ -162,7 +163,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id','image','name','description','types','typesJson')
+        fields = ('id','image','name','description','types','typesJson','media')
 
 class UpdateProductSerializer(serializers.ModelSerializer):
     types=ProductTypeSeraizer(many=True,read_only=True)

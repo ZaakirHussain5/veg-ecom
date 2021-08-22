@@ -1,7 +1,7 @@
 from rest_framework import routers
 from django.urls import path,include
 
-from .views import LoginAPI,UserInvoiceAPI,AdminInvoiceAPI, AdminPaymentList, AdminDueList, invoice,UserLedgerAPI,UserPaymentAPI,AdminOrderAPI,AdminCustomerAPI,ProductAPI
+from .views import LoginAPI,UserInvoiceAPI,AdminInvoiceAPI, AdminPaymentList, AdminDueList, invoice,UserLedgerAPI,UserPaymentAPI,AdminOrderAPI,AdminCustomerAPI,ProductAPI,addProductMedia,removeProductMedia
 
 router = routers.DefaultRouter()
 router.register('invoices',UserInvoiceAPI,'invoices')
@@ -18,4 +18,6 @@ urlpatterns = [
     path('invoice',invoice,name='invoice'),
     path('CreditLedger',UserLedgerAPI.as_view(),name='CreditLedger'),
     path('w/login',LoginAPI.as_view(),name='login'),
+    path('w/addProductMedia',addProductMedia,name='addProductMedia'),
+    path('w/removeProductMedia/<int:id>/',removeProductMedia,name='removeProductMedia'),
 ]

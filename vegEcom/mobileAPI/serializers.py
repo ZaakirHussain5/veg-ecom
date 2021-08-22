@@ -57,7 +57,7 @@ class TypeSerialiser(serializers.ModelSerializer):
 class ProductMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductMedia
-        fields = ('mediaType','mediaUrl',)
+        fields = ('mediaType','mediaUrl','id')
 
 class ProductSerializer(serializers.ModelSerializer):
     media = ProductMediaSerializer(read_only=True,many=True)

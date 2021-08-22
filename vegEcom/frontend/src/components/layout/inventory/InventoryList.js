@@ -145,7 +145,7 @@ export default function InventoryList() {
 
     useEffect(() => {
         loadProducts()
-    }, [])
+    }, [itemId])
 
     const loadProducts = function () {
         setIsLoading(true)
@@ -172,7 +172,15 @@ export default function InventoryList() {
     
     const confirmDelete = () => {
         setIsDeleteLoading(true)
-        setTimeout(()=>{
+        fetch(`/api/w/product/${deleteItemId}/`,{
+            method:"DELETE",
+            headers:{
+                Authorization:`Token ${localStorage.getItem('AdminToken')}`
+            }
+        })
+        .then(res => {
+            if(!res.ok)
+                throw Error("Product Deletion Failed!")
             setIsDeleteLoading(false)
             setAlert({
                 color:"success",
@@ -181,7 +189,14 @@ export default function InventoryList() {
             setIsAlert(true)
             setConfirmOpen(false)
             loadProducts()
-        },2000)
+        })
+        .catch(err=>{
+             setAlert({
+                color:"error",
+                message: err.message
+            })
+            setIsAlert(true)
+        })
     }
 
     const handleAlertClose = (event, reason) => {

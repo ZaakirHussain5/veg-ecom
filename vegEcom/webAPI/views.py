@@ -1,17 +1,19 @@
 from django.shortcuts import render
 from datetime import date as dateObj
-from rest_framework import viewsets,generics,mixins,permissions
+from rest_framework import viewsets,generics,mixins,permissions,status
 from knox.models import AuthToken
 from rest_framework.response import Response
 from django.db.models import Sum
 from decimal import Decimal
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view,permission_classes
+from rest_framework.serializers import Serializer
 
 from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer
 from .models import Invoice,UserCreditLedger
-from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer
-from mobileAPI.models import Order,Product
+from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer,ProductMediaSerializer
+from mobileAPI.models import Order,Product,ProductMedia
 
 
 def invoice(request):
@@ -196,7 +198,45 @@ class AdminCustomerAPI(viewsets.ModelViewSet):
 class ProductAPI(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes=[permissions.IsAdminUser]
-    queryset=Product.objects.all() 
+    queryset=Product.objects.all()
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAdminUser])
+def addProductMedia(request):
+    err = {}
+    if request.FILES["mediaUrl"] is None:
+        err["mediaUrl"] = ["This Field is reuired."]
+    
+    if request.data.get("mediaType") is None:
+        err["mediaType"] = ["This Field is reuired."]
+    
+    if request.data.get("productId") is None:
+        err["productId"] = ["This Field is reuired."]
+    
+    if len(err) > 0:
+        return Response(err,status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = ProductMediaSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    productMedia = serializer.save()
+
+    product = Product.objects.get(id=request.data.get("productId"))
+    product.media.add(productMedia)
+    product.save()
+
+    return Response(ProductMediaSerializer(productMedia).data)
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAdminUser])
+def removeProductMedia(request,id):
+    deleted = ProductMedia.objects.filter(id=id).delete()
+    return Response({})
+
+    
+
+
+
+
 
 
 
