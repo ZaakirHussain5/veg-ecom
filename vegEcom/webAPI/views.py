@@ -8,7 +8,6 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view,permission_classes
-from rest_framework.serializers import Serializer
 
 from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer
 from .models import Invoice,UserCreditLedger
@@ -185,6 +184,12 @@ class AdminOrderAPI(viewsets.ModelViewSet):
         user = get_object_or_404(queryset, pk=pk)
         serializer = OrderListSerialiizer(user)
         return Response(serializer.data)
+    
+    def partial_update(self, request, pk=None):
+        serializer = OrderListSerialiizer(data=request.data,partial=True)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data)
 
 class AdminCustomerAPI(viewsets.ModelViewSet):
     serializer_class = UserSerializer
@@ -199,6 +204,11 @@ class ProductAPI(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes=[permissions.IsAdminUser]
     queryset=Product.objects.all()
+
+class UpdateInvoiceAPI(viewsets.ModelViewSet):
+    serializer_class = UpdateInvoiceSerializer
+    permission_classes=[permissions.IsAdminUser]
+    queryset=Invoice.objects.all()
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAdminUser])

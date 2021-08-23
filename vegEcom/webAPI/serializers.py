@@ -88,6 +88,8 @@ class UpdateInvoiceSerializer(serializers.ModelSerializer):
         user.save()
         Invoice.objects.filter(id=invoiceId).update(**validated_data)
         invoice = Invoice.objects.get(id=invoiceId)
+        invoice.user = user
+        invoice.save()
         UserCreditLedger.objects.filter(refId=invoice.invoiceID).delete()
         InvoiceItem.objects.filter(invoice=invoice).delete()
         InvoiceCharges.objects.filter(invoice=invoice).delete()

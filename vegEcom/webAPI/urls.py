@@ -1,11 +1,12 @@
 from rest_framework import routers
 from django.urls import path,include
 
-from .views import LoginAPI,UserInvoiceAPI,AdminInvoiceAPI, AdminPaymentList, AdminDueList, invoice,UserLedgerAPI,UserPaymentAPI,AdminOrderAPI,AdminCustomerAPI,ProductAPI,addProductMedia,removeProductMedia
+from .views import LoginAPI,UserInvoiceAPI,AdminInvoiceAPI, AdminPaymentList, AdminDueList, invoice,UserLedgerAPI,UserPaymentAPI,AdminOrderAPI,AdminCustomerAPI,ProductAPI,addProductMedia,removeProductMedia,UpdateInvoiceAPI
 
 router = routers.DefaultRouter()
 router.register('invoices',UserInvoiceAPI,'invoices')
 router.register('w/invoices',AdminInvoiceAPI,'adminInvoices')
+router.register('w/UpdateInvoice',UpdateInvoiceAPI,'adminInvoices')
 router.register('w/payments',AdminPaymentList,'adminpayments')
 router.register('w/dues',AdminDueList,'admindues')
 router.register('newPayment',UserPaymentAPI,'newPayment')
