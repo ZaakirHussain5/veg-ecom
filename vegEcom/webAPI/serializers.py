@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from django.db.models import Sum
+from django.db.models import Sum, fields
 
 from .models import Invoice,InvoiceItem,UserCreditLedger,ServiceLocation,InvoiceCharges 
 from mobileAPI.serializers import UserSerializer,ProductMediaSerializer
@@ -113,9 +113,34 @@ class LoginSerializer(serializers.Serializer):
 
     def validate(self,data):
         user = authenticate(**data)
-        if user and user.is_active:
+        if user and user.is_active and user.is_superuser:
             return user
         raise serializers.ValidationError("Invalid Username/Password!")
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        password = validated_data.pop('password',None)
+        instance = self.Meta.model(**validated_data)
+
+        if password is not None :
+            instance.set_password(password)
+        instance.is_superuser = True
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        for attr,value in validated_data.items():
+            if attr == 'password':
+                instance.set_password(value)
+            else:
+                setattr(instance,attr,value)
+        instance.save()
+        return instance
+    
+    class Meta:
+        model = User
+        extra_kwargs = {'password':{'write_only':True,'required':False}}
+        fields = ('id','first_name','email','password','username')
 
 
 class UserTransactionSerializer(serializers.ModelSerializer):

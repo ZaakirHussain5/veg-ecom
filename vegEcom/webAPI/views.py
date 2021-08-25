@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view,permission_classes
 
-from .serializers import LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer
+from .serializers import AdminUserSerializer, LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer
 from .models import Invoice,UserCreditLedger
 from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer,ProductMediaSerializer
 from mobileAPI.models import Order,Product,ProductMedia
@@ -239,8 +239,13 @@ def addProductMedia(request):
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAdminUser])
 def removeProductMedia(request,id):
-    deleted = ProductMedia.objects.filter(id=id).delete()
+    ProductMedia.objects.filter(id=id).delete()
     return Response({})
+
+class AdminUsersAPI(viewsets.ModelViewSet):
+    serializer_class = AdminUserSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = User.objects.filter(is_superuser=True)
 
     
 

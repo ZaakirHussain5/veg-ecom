@@ -114,10 +114,10 @@ export default function Login(props) {
                             required
                             fullWidth
                             id="Username"
-                            label="Username"
+                            label="Phone No."
                             name="Username"
                             onChange={(e)=> setUsername(e.target.value)}
-                            helperText="Enter Username"
+                            helperText="Enter Phone No."
                             autoFocus
                         />
                         <TextField

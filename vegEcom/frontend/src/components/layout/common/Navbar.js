@@ -38,11 +38,11 @@ ListItemLink.propTypes = {
 
 export const mainListItems = (
   <div>
-    <ListItemLink to="/" primary="Dashboard" icon={<DashboardIcon />} />
+    <ListItemLink to="/" primary="Dashboard" icon={<BarChartIcon />} />
     <ListItemLink to="/Orders" primary="Orders" icon={<ShoppingCartIcon />} />
-    <ListItemLink to="/Customers" primary="Customers" icon={<DashboardIcon />} />
-    <ListItemLink to="/Invoices" primary="Invoices" icon={<LayersIcon />} />
-    <ListItemLink to="/Inventory" primary="Inventory" icon={<LayersIcon />} />
+    <ListItemLink to="/Customers" primary="Customers" icon={<PeopleIcon />} />
+    <ListItemLink to="/Invoices" primary="Invoices" icon={<AssignmentIcon />} />
+    <ListItemLink to="/Inventory" primary="Inventory" icon={<DashboardIcon />} />
   </div>
 );
 
@@ -50,17 +50,6 @@ export const secondaryListItems = (
   <div>
     <ListSubheader inset>Adminstration</ListSubheader>
     <ListItemLink to="/ProductMedia" primary="Product Media" icon={<LayersIcon />} />
-    <ListItem button>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Users" />
-    </ListItem>
-    <ListItem button>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Offers" />
-    </ListItem>
+    <ListItemLink to="/Users" primary="Users" icon={<PeopleIcon />} />
   </div>
 );
