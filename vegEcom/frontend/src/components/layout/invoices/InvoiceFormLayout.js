@@ -110,7 +110,8 @@ export default function InvoiceFormLayout(props) {
             .then(order => {
                 setCustomerName(order.user.first_name)
                 setPhoneNo(order.user.username)
-                setAddress(order.billingAddress.address)
+                if(order.billingAddress)
+                    setAddress(order.billingAddress.address)
 
                 var newItemsList = []
 

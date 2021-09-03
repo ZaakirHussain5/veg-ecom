@@ -70,6 +70,13 @@ export default function OrdersList() {
 
     const cols = [
         { field: 'orderId', headerName: 'Order #', width: 150},
+        { field: 'CustomerName', headerName: 'Customer Name', width: 150,
+        renderCell: (GridCellParams) => {
+            // console.log(GridCellParams)
+            return (
+                <div>{GridCellParams.row.user && GridCellParams.row.user.fullName }</div>
+            )}
+        },
         { field: 'formattedCreatedAt', headerName: 'Ordered Date', width: 170
         
         },
@@ -77,7 +84,7 @@ export default function OrdersList() {
         renderCell: (GridCellParams) => {
             // console.log(GridCellParams)
             return (
-                <div>{GridCellParams.row.shippingAddress.address} </div>
+                <div>{GridCellParams.row.shippingAddress && GridCellParams.row.shippingAddress.address}</div>
             )}
         },
         {

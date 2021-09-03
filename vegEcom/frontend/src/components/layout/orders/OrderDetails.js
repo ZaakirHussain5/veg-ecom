@@ -34,6 +34,7 @@ export default function OrderDetails(props) {
 
     const [orderId,setOrderId] = useState("")
     const [phoneNo,setPhoneNo] = useState("")
+    const [customerName,setCustomerName] = useState("")
     const [deliveryAddress,setDeliveryAddress] = useState("")
     const [orderStatus, setOrderStatus] = useState("Pending")
     const [orderItems, setOrderItems] = useState([]);
@@ -54,10 +55,15 @@ export default function OrderDetails(props) {
             .then(response => response.json())
             .then(order => {
                 setOrderId(order.orderId)
-                setPhoneNo(order.user.username)
                 setIsInvoiceCreated(order.isInvoiceCreated)
-                setDeliveryAddress(order.shippingAddress.address)
                 setOrderStatus(order.status)
+                if(order.shippingAddress)
+                    setDeliveryAddress(order.shippingAddress.address)
+                if(order.user){
+                    setPhoneNo(order.user.username)
+                    setCustomerName(order.user.fullName)
+                }
+                
                 
                 var orderItemsFromAPI = order.items
                 var newOrderItems = []
@@ -125,6 +131,14 @@ export default function OrderDetails(props) {
                                         </TableCell>
                                         <TableCell>
                                             {orderId}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>
+                                            Customer Name
+                                        </TableCell>
+                                        <TableCell>
+                                            {customerName}
                                         </TableCell>
                                     </TableRow>
                                     <TableRow>
