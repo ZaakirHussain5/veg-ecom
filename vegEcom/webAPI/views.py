@@ -184,12 +184,6 @@ class AdminOrderAPI(viewsets.ModelViewSet):
         user = get_object_or_404(queryset, pk=pk)
         serializer = OrderListSerialiizer(user)
         return Response(serializer.data)
-    
-    def partial_update(self, request, pk=None):
-        serializer = OrderListSerialiizer(data=request.data,partial=True)
-        serializer.is_valid()
-        serializer.save()
-        return Response(serializer.data)
 
 class AdminCustomerAPI(viewsets.ModelViewSet):
     serializer_class = UserSerializer
