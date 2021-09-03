@@ -232,7 +232,7 @@ export default function InventoryForm(props) {
             return
         }
         
-        if (!productId && productId == -1) {
+        if (!productId || productId == -1) {
             if (!productImage) {
                 setAlert({
                     color: "error",
@@ -292,9 +292,9 @@ export default function InventoryForm(props) {
                 color:"success",
                 message:"Product Saved Successfully"
             })
-            setIsAlert(true)
             setIsLoading(false)
-            if (!productId && productId == -1) {
+            setIsAlert(true)
+            if (!productId || productId == -1) {
                 setProductName("")
                 setProductDescription("")
                 setProductTypes([])
