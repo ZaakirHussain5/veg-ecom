@@ -140,9 +140,9 @@ export default function InvoiceFormLayout(props) {
                             itemName: _itemName, qty: 1, price: _price, amount: _price
                         })
                     }
-
-                    setOrderItems(newItemsList)
                 })
+                
+                setOrderItems(newItemsList)
 
                 setIsLoading(false)
             })
