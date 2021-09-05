@@ -141,7 +141,7 @@ export default function InvoiceFormLayout(props) {
                         })
                     }
                 })
-                
+
                 setOrderItems(newItemsList)
 
                 setIsLoading(false)
@@ -258,6 +258,15 @@ export default function InvoiceFormLayout(props) {
         if (orderItems.length == 0) {
             setAlert({
                 message: "Atleast one item should be added to the Invoice.",
+                color: "error"
+            })
+            setIsAlert(true)
+            return
+        }
+
+        if (paidAmount == '' ){
+            setAlert({
+                message: "Enter Paid Amount.",
                 color: "error"
             })
             setIsAlert(true)

@@ -152,6 +152,7 @@ class Order(models.Model):
     shippingAddress = models.ForeignKey(OrderAddress,on_delete=models.SET_NULL,null=True,related_name="ShippingAddress")
     billingAddress = models.ForeignKey(OrderAddress,on_delete=models.SET_NULL,null=True,related_name="BillingAddress")
     isInvoiceCreated = models.BooleanField(default=False)
+    isCashOnDelivery = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

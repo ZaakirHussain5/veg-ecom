@@ -38,7 +38,8 @@ export default function OrderDetails(props) {
     const [deliveryAddress,setDeliveryAddress] = useState("")
     const [orderStatus, setOrderStatus] = useState("Pending")
     const [orderItems, setOrderItems] = useState([]);
-    const [isInvoiceCreated, setIsInvoiceCreated] = useState([]);
+    const [isInvoiceCreated, setIsInvoiceCreated] = useState(false);
+    const [isCashOnDelivery, setIsCashOnDelivery] = useState(false);
     
     const [isLoading, setIsLoading] = useState(false)
     const [isOrderProcessing, setIsOrderProcessing] = useState(false)
@@ -57,6 +58,7 @@ export default function OrderDetails(props) {
                 setOrderId(order.orderId)
                 setIsInvoiceCreated(order.isInvoiceCreated)
                 setOrderStatus(order.status)
+                setIsCashOnDelivery(order.isCashOnDelivery)
                 if(order.shippingAddress)
                     setDeliveryAddress(order.shippingAddress.address)
                 if(order.user){
@@ -155,6 +157,14 @@ export default function OrderDetails(props) {
                                         </TableCell>
                                         <TableCell>
                                             {deliveryAddress}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>
+                                            Cash on Delivery
+                                        </TableCell>
+                                        <TableCell>
+                                            {isCashOnDelivery ? "Yes" : "No"}
                                         </TableCell>
                                     </TableRow>
                                     <TableRow>

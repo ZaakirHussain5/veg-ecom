@@ -174,8 +174,10 @@ class AdminOrderAPI(viewsets.ModelViewSet):
                 to_date = self.request.query_params['to_date']
                 orders = orders.filter(created_at__date__lte=to_date).order_by('-created_at')
                 print('To date', orders)
-        else:
+        elif 'today' in self.request.query_params:
             orders = Order.objects.filter(created_at__date=date).order_by('-created_at')
+        else:
+            orders = Order.objects.all()
         # print(orders)
         return orders
     

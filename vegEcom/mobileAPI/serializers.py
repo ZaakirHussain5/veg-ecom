@@ -97,7 +97,7 @@ class OrderListSerialiizer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
-        fields = ('id','user','items','orderId','status','formattedCreatedAt','formattedUpdatedAt','shippingAddress','billingAddress','isInvoiceCreated')
+        fields = ('id','user','items','orderId','status','formattedCreatedAt','formattedUpdatedAt','shippingAddress','billingAddress','isInvoiceCreated','isCashOnDelivery')
 
 class OrderItemSerialiizer(serializers.ModelSerializer):
     
