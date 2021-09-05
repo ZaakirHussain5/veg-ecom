@@ -1,7 +1,7 @@
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 
-from .views import UserLoginAPI,ProductAPI,CartAPI,OrderAPI,OrderAddressAPI,DeleteCartItemAPI,EmptyCart,GetUser,GetServiceAvailablity,changeDeleiveryType
+from .views import UserLoginAPI,ProductAPI,CartAPI,OrderAPI,OrderAddressAPI,DeleteCartItemAPI,EmptyCart,GetUser,GetServiceAvailablity,changeDeleiveryType,UpdateCustomerProfile
 
 router = DefaultRouter()
 router.register('products',ProductAPI,'products')
@@ -17,4 +17,5 @@ urlpatterns = [
     path('GetUser',GetUser,name="GetUser"),
     path('GetServiceAvailablity',GetServiceAvailablity,name="GetServiceAvailablity"),
     path('changeDeleiveryType',changeDeleiveryType,name="changeDeleiveryType"),
+    path('UpdateCustomerProfile',UpdateCustomerProfile,name="UpdateCustomerProfile"),
 ]

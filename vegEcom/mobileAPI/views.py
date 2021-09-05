@@ -1,10 +1,11 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
 from rest_framework import viewsets,generics,mixins,permissions,status
 from rest_framework.response import Response
 from knox.models import AuthToken
 from rest_framework.decorators import api_view,permission_classes
 
-from .serializers import UserLogin,ProductSerializer,CartSerializer,CartDetailsSerializer,OrderSerializer,OrderAddressSerialiizer,CartItemSerializer,CartListSerializer,OrderListSerialiizer,UserSerializer
+from .serializers import UserLogin,ProductSerializer,CartSerializer,CartDetailsSerializer,OrderSerializer,OrderAddressSerialiizer,CartItemSerializer,CartListSerializer,OrderListSerialiizer,UserSerializer,check_otp
 from .models import DeliveryType, Product,OrderAddress,CartItem
 from webAPI.serializers import ServiceLocationSerializer
 from webAPI.models import ServiceLocation
@@ -103,7 +104,56 @@ def changeDeleiveryType(request):
         dt = DeliveryType.objects.create(user=request.user,deliveryType=request.data.get('type'),name=request.data.get('name'))
     return Response({
         "message":"Delivery Type Updated Successfully"
-    }) 
+    })
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def UpdateCustomerProfile(request):
+    phoneNo = request.data.get("phoneNo")
+    deliveryType = request.data.get("deliveryType")
+    name = request.data.get("name")
+    otp = request.data.get("otp")
+
+    err = {}
+    if phoneNo is None:
+        err["phoneNo"] = ["This Field is Required."]
+    
+    if name is None:
+        err["name"] = ["This Field is Required."]
+    
+    if otp is None:
+        err["otp"] = ["This Field is Required."]
+    
+    if deliveryType is None:
+        err["deliveryType"] = ["This Field is Required."]
+    
+    phoneExists = User.objects.filter(username=phoneNo).count() != 0
+
+    if phoneExists:
+        err["phoneNo"] = "Phone Number Already Exists."
+    
+    if check_otp(phoneNo,otp) == False:
+        err["otp"] = ["Invalid OTP."]
+    
+    if len(err) > 0 :
+        return Response(err,status=status.HTTP_400_BAD_REQUEST)
+    try:
+        dt = request.user.DeliveryType
+        dt.name = request.data.get('name')
+        dt.save()
+    except DeliveryType.DoesNotExist:
+        dt = DeliveryType.objects.create(user=request.user,deliveryType=deliveryType,name=name)
+    
+    
+
+
+    user = request.user
+    user.username = phoneNo
+    user.save()
+
+    return Response(UserSerializer(user).data,status=status.HTTP_200_OK)
+
+    
+
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
