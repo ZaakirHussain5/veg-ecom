@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -16,14 +16,33 @@ const useStyles = makeStyles({
 
 export default function Sales() {
     const classes = useStyles();
+    const [income,setIncome] = useState("0")
+
+    function commify(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    useEffect(()=>{
+        fetch('/api/w/getTodaysIncome',{
+            method:'GET',
+            headers:{
+                "Authorization":`Token ${localStorage.getItem('AdminToken')}`
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            setIncome(commify(data.total.toFixed(2)))
+        })
+    },[])
+
     return (
         <React.Fragment>
             <Title>Total Sales</Title>
             <Typography component="p" variant="h4">
-                ₹3,024.00
+                ₹{income}
             </Typography>
             <Typography color="textSecondary" className={classes.depositContext}>
-                on 15 March, 2019
+                on {new Date().toDateString()}
             </Typography>
         </React.Fragment>
     );

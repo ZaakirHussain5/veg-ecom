@@ -42,6 +42,7 @@ export default function InvoiceDetails(props) {
         .then(res => res.json())
         .then(invoice => {
             
+            setInvoiceNo(invoice.invoiceID)
             setCustomerName(invoice.user.first_name)
             setPhoneNo(invoice.user.username)
             setAddress(invoice.billingAddress)
@@ -152,6 +153,11 @@ export default function InvoiceDetails(props) {
                                     })}
                                     <TableRow>
                                         <TableCell colSpan="4" align="right">
+                                            <a target="_blank" href={'/api/invoice?invoice='+invoiceNo}>
+                                            <Button variant="contained" size="small" className={classes.btn} color="primary">
+                                                Print Invoice
+                                            </Button>
+                                            </a>
                                             <Link to={"/EditInvoice/" + invoiceId}>
                                                 <Button variant="contained" size="small" className={classes.btn} color="primary">
                                                     Edit Invoice

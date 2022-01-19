@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-export default function Reports() {
+export default function Reports(props) {
     const classes = useStyles();
     const [value, setValue] = useState(0);
 
@@ -83,16 +83,16 @@ export default function Reports() {
                             </Tabs>
                         </AppBar>
                         <TabPanel value={value} index={0}>
-                           <Orders />
+                           <Orders id={props.id} />
                         </TabPanel>
                         <TabPanel value={value} index={1}>
-                            <Invoices />
+                            <Invoices id={props.id} />
                         </TabPanel>
                         <TabPanel value={value} index={2}>
-                            <CustomerPayments />
+                            <CustomerPayments id={props.id} />
                         </TabPanel>
                         <TabPanel value={value} index={3}>
-                            <CustomerDues />
+                            <CustomerDues id={props.id} />
                         </TabPanel>
                     </Paper>
                 </Grid>

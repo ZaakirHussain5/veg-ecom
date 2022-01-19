@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import Users from '../layout/dashboard/Users';
+import CustomerList from '../layout/customers/CustomersList';
 import Chart from '../layout/dashboard/Chart';
 import Sales from '../layout/dashboard/Sales';
 import Admin from '../layout/common/Admin';
@@ -43,7 +43,7 @@ export default function Customers() {
                 </Grid>
                 <Grid item xs={12}>
                     <Paper className={classes.paper}>
-                        <Users />
+                        <CustomerList dashboard={true} />
                     </Paper>
                 </Grid>
             </Grid>

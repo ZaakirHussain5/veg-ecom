@@ -7,7 +7,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import OrderDetails from '../orders/OrderDetails';
 
 
-export default function Orders() {
+export default function Orders(props) {
     const date = new Date();
     const todayDate = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
     const [rows, setRows] = useState([]);
@@ -24,6 +24,8 @@ export default function Orders() {
         if (from_date !== '') {
             params.push(`from_date=${from_date}`)
         }
+        params.push(`customer=${props.id}`)
+
         const queryParams = params.join('&')
         if (queryParams !== '') {
             url = `${url}?${queryParams}`;

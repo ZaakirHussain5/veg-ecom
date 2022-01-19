@@ -93,7 +93,7 @@ export default function CustomerDetails(props) {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Reports />
+            <Reports id={props.id} />
             </div>
             }
          </Fragment>

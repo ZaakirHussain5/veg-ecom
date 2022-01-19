@@ -7,7 +7,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import Skeleton from 'react-loading-skeleton';
 
 
-export default function CutomersList() {
+export default function CutomersList(props) {
 
     const [customerId , setCustomerId ] = useState(0)
     
@@ -21,7 +21,7 @@ export default function CutomersList() {
 
     useEffect(()=>{
         setIsLoading(true)
-        fetch('/api/w/AdminCustomer',{
+        fetch('/api/w/AdminCustomer/',{
             method:"GET",
             headers:{
                 Authorization:`Token ${localStorage.getItem('AdminToken')}`
@@ -79,12 +79,13 @@ export default function CutomersList() {
                     {isLoading ?
                         <Skeleton count={12} />
                         :
-                        <div style={{ height: 400, width: '100%' }}>
+                        <div style={{ height: 420, width: '100%' }}>
                             <DataGrid
+                                checkboxSelection={props.dashboard}
                                 density="compact"
                                 rows={rows}
                                 columns={cols}
-                                pageSize={10}
+                                pageSize={8}
                                 components={{
                                     Toolbar: GridToolbar,
                                 }} />

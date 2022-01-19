@@ -215,3 +215,4 @@ class UpdateProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id','image','name','description','types','typesJson')
 
+

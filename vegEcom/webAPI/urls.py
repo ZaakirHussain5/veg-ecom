@@ -1,7 +1,7 @@
 from rest_framework import routers
 from django.urls import path,include
 
-from .views import AdminUsersAPI, LoginAPI,UserInvoiceAPI,AdminInvoiceAPI, AdminPaymentList, AdminDueList, invoice,UserLedgerAPI,UserPaymentAPI,AdminOrderAPI,AdminCustomerAPI,ProductAPI,addProductMedia,removeProductMedia,UpdateInvoiceAPI
+from .views import getGraphData, AdminUsersAPI, LoginAPI,UserInvoiceAPI,AdminInvoiceAPI, AdminPaymentList, AdminDueList, invoice,UserLedgerAPI,UserPaymentAPI,AdminOrderAPI,AdminCustomerAPI,ProductAPI,addProductMedia,removeProductMedia,UpdateInvoiceAPI,getTodaysIncome,ServicesLocationAPI
 
 router = routers.DefaultRouter()
 router.register('invoices',UserInvoiceAPI,'invoices')
@@ -13,11 +13,14 @@ router.register('newPayment',UserPaymentAPI,'newPayment')
 router.register('w/AdminOrder',AdminOrderAPI,'AdminOrder')
 router.register('w/AdminCustomer',AdminCustomerAPI,'AdminCustomer')
 router.register('w/product',ProductAPI,'product')
+router.register('w/pincodes',ServicesLocationAPI,'pincodes')
 router.register('w/users',AdminUsersAPI,'users')
 
 urlpatterns = [
     path('',include(router.urls)),
     path('invoice',invoice,name='invoice'),
+    path('w/getGraphData',getGraphData,name='getGraphData'),
+    path('w/getTodaysIncome',getTodaysIncome,name='getTodaysIncome'),
     path('CreditLedger',UserLedgerAPI.as_view(),name='CreditLedger'),
     path('w/login',LoginAPI.as_view(),name='login'),
     path('w/addProductMedia',addProductMedia,name='addProductMedia'),

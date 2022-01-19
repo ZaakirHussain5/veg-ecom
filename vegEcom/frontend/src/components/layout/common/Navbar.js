@@ -8,7 +8,8 @@ import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import PeopleIcon from '@material-ui/icons/People';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import LayersIcon from '@material-ui/icons/Layers';
-import AssignmentIcon from '@material-ui/icons/Assignment';
+import AssignmentIcon from '@material-ui/icons//Assignment';
+import RoomIcon from '@material-ui/icons/Room';
 import { Link as RouterLink } from 'react-router-dom'
 import PropTypes from 'prop-types';
 
@@ -51,5 +52,6 @@ export const secondaryListItems = (
     <ListSubheader inset>Adminstration</ListSubheader>
     <ListItemLink to="/ProductMedia" primary="Product Media" icon={<LayersIcon />} />
     <ListItemLink to="/Users" primary="Users" icon={<PeopleIcon />} />
+    <ListItemLink to="/Pincodes" primary="Pincodes" icon={<RoomIcon />} />
   </div>
 );

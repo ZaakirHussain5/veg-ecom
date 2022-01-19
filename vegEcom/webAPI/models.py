@@ -55,7 +55,7 @@ class UserCreditLedger(models.Model):
     description = models.TextField(null=True,blank=True)
     transactionType = models.CharField(max_length=1,default='D')
     amount = models.DecimalField(max_digits=10,decimal_places=2)
-    transactionDateTime = models.DateTimeField(default=timezone.now)
+    transactionDateTime = models.DateField(default=timezone.now)
 
     @property
     def formattedTransactionDateTime(self):

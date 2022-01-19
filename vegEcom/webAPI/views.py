@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from datetime import date as dateObj
+from datetime import date as dateObj,timedelta
 from rest_framework import viewsets,generics,mixins,permissions,status
 from knox.models import AuthToken
 from rest_framework.response import Response
@@ -9,8 +9,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view,permission_classes
 
-from .serializers import AdminUserSerializer, LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer
-from .models import Invoice,UserCreditLedger
+from .serializers import AdminUserSerializer, LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer,ServiceLocationSerializer
+from .models import Invoice,UserCreditLedger,ServiceLocation
 from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer,ProductMediaSerializer
 from mobileAPI.models import Order,Product,ProductMedia
 
@@ -60,17 +60,15 @@ class AdminInvoiceAPI(viewsets.ModelViewSet):
         
         orders=[]
         if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
-            if('from_date' in self.request.query_params):
-                from_date = self.request.query_params['from_date']
-                orders = Invoice.objects.filter(created_at__gte=from_date).order_by('-created_at')
-                print(orders)
-            if ('to_date' in self.request.query_params):
-                to_date = self.request.query_params['to_date']
-                orders = Invoice.objects.filter(created_at__lte=to_date).order_by('-created_at')
-                print('d', orders)
+            from_date = self.request.query_params['from_date']
+            to_date = self.request.query_params['to_date']
+            orders = Invoice.objects.filter(created_at__gte=from_date).filter(created_at__lte=to_date).order_by('-created_at')
         else: 
             date = dateObj.today()
             orders = Invoice.objects.filter(created_at=date).order_by('-created_at')
+        if(('customer' in self.request.query_params)):
+            customer = self.request.query_params['customer']
+            orders = orders.filter(user__id=customer)
         return orders
     
     def retrieve(self, request, pk=None):
@@ -91,17 +89,15 @@ class AdminDueList(mixins.ListModelMixin,viewsets.GenericViewSet):
         
         orders=[]
         if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
-            if('from_date' in self.request.query_params):
-                from_date = self.request.query_params['from_date']
-                orders = UserCreditLedger.objects.filter(transactionType="D", transactionDateTime__date__gte=from_date).order_by('-transactionDateTime')
-                print('From date', orders)
-            if ('to_date' in self.request.query_params):
-                to_date = self.request.query_params['to_date']
-                orders = UserCreditLedger.objects.filter(transactionType="D", transactionDateTime__date__lte=to_date).order_by('-transactionDateTime')
-                print('To date', orders)
+            from_date = self.request.query_params['from_date']
+            to_date = self.request.query_params['to_date']
+            orders = UserCreditLedger.objects.filter(transactionType="D", transactionDateTime__date__gte=from_date).filter(transactionDateTime__date__lte=to_date).order_by('-transactionDateTime') 
         else: 
             date = dateObj.today()
             orders = UserCreditLedger.objects.filter(transactionType="D", transactionDateTime__date=date).order_by('-transactionDateTime')
+        if(('customer' in self.request.query_params)):
+            customer = self.request.query_params['customer']
+            orders = orders.filter(user__id=customer)
         return orders
 
 
@@ -115,15 +111,16 @@ class AdminPaymentList(mixins.ListModelMixin,viewsets.GenericViewSet):
         
         orders=[]
         if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
-            if('from_date' in self.request.query_params):
-                from_date = self.request.query_params['from_date']
-                orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date__gte=from_date).order_by('-transactionDateTime')
-            if ('to_date' in self.request.query_params):
-                to_date = self.request.query_params['to_date']
-                orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date__lte=to_date).order_by('-transactionDateTime')
+            from_date = self.request.query_params['from_date']
+            to_date = self.request.query_params['to_date']
+            orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date__gte=from_date).filter(transactionDateTime__date__lte=to_date).order_by('-transactionDateTime')
         else: 
             date = dateObj.today()
             orders = UserCreditLedger.objects.filter(transactionType="P", transactionDateTime__date=date).order_by('-transactionDateTime')
+        if(('customer' in self.request.query_params)):
+            customer = self.request.query_params['customer']
+            orders = orders.filter(user__id=customer)
+        
         return orders
         
 
@@ -166,19 +163,17 @@ class AdminOrderAPI(viewsets.ModelViewSet):
         date = dateObj.today()
         orders = []
         if(('from_date' in self.request.query_params) or ('to_date' in self.request.query_params)):
-            if('from_date' in self.request.query_params):
-                from_date = self.request.query_params['from_date']
-                orders = Order.objects.filter(created_at__date__gte=from_date).order_by('-created_at')
-                print('From date', orders)
-            if ('to_date' in self.request.query_params):
-                to_date = self.request.query_params['to_date']
-                orders = orders.filter(created_at__date__lte=to_date).order_by('-created_at')
-                print('To date', orders)
+            from_date = self.request.query_params['from_date']
+            to_date = self.request.query_params['to_date']
+            orders = Order.objects.filter(created_at__date__gte=from_date).filter(created_at__date__lte=to_date).order_by('-created_at')
+            
         elif 'today' in self.request.query_params:
             orders = Order.objects.filter(created_at__date=date).order_by('-created_at')
         else:
             orders = Order.objects.all()
-        # print(orders)
+        if(('customer' in self.request.query_params)):
+            customer = self.request.query_params['customer']
+            orders = orders.filter(user__id=customer)
         return orders
     
     def retrieve(self, request, pk=None):
@@ -238,10 +233,42 @@ def removeProductMedia(request,id):
     ProductMedia.objects.filter(id=id).delete()
     return Response({})
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAdminUser])
+def getGraphData(request):
+    from_date=(dateObj.today() - timedelta(days=7)).strftime('%Y-%m-%d')
+    to_date=dateObj.today().strftime('%Y-%m-%d')
+    invoicesGraphData = Invoice.objects.filter(
+        created_at__gte=from_date).filter(
+            created_at__lte=to_date).values(
+                'created_at').annotate(
+                    date_total=Sum('grandTotal'))
+    result = []
+    for invoiceGraph in invoicesGraphData:
+        result.append({
+            "created_at":invoiceGraph["created_at"],
+            "total":invoiceGraph["date_total"]
+        })
+    return Response(result)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAdminUser])
+def getTodaysIncome(request):
+    today_date=dateObj.today().strftime('%Y-%m-%d')
+    return Response({
+        "total":Invoice.objects.filter(
+            created_at=today_date).aggregate(Sum('grandTotal'))["grandTotal__sum"]
+    })
+
 class AdminUsersAPI(viewsets.ModelViewSet):
     serializer_class = AdminUserSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = User.objects.filter(is_superuser=True)
+
+class ServicesLocationAPI(viewsets.ModelViewSet):
+    serializer_class = ServiceLocationSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = ServiceLocation.objects.all()
 
     
 

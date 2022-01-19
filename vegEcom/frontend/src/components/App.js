@@ -11,6 +11,7 @@ import InvoiceForm from './layout/invoices/InvoiceForm'
 import Inventory from './pages/Inventory'
 import ProductMedia from './layout/masters/ProductMedia'
 import Users from './layout/masters/Users';
+import Pincodes from './layout/masters/Pincodes';
 import LoadingBar from 'react-top-loading-bar'
 import { useLocation } from 'react-router-dom'
 
@@ -165,6 +166,20 @@ const App = function () {
                         render={({ location }) =>
                             isTokenValid ? (
                                 <Users />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+                    <Route path="/Pincodes"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <Pincodes />
                             ) : (
                                 <Redirect
                                     to={{

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { useTheme } from '@material-ui/core/styles';
 import { LineChart, Line, XAxis, YAxis, Label, ResponsiveContainer } from 'recharts';
 import Title from './Title';
@@ -8,20 +8,32 @@ function createData(time, amount) {
   return { time, amount };
 }
 
-const data = [
-  createData('10/05/2021', 0),
-  createData('11/05/2021', 300),
-  createData('12/05/2021', 600),
-  createData('13/05/2021', 800),
-  createData('14/05/2021', 1500),
-  createData('15/05/2021', 2000),
-  createData('16/05/2021', 2400),
-  createData('17/05/2021', 2400),
-  createData('18/05/2021', undefined),
-];
+
 
 export default function Chart() {
   const theme = useTheme();
+
+  const [data,setData] = useState([]);
+
+  useEffect(()=>{
+    fetch('/api/w/getGraphData',{
+      method:'GET',
+      headers:{
+        "Authorization":`Token ${localStorage.getItem('AdminToken')}`
+      }
+    })
+    .then(response => response.json())
+    .then(graphData => {
+      var newDataList = []
+      graphData.map(item => {
+        newDataList.push(createData(
+          item.created_at,item.total
+        ))
+      })
+      
+      setData(newDataList)
+    })
+  },[])
 
   return (
     <React.Fragment>

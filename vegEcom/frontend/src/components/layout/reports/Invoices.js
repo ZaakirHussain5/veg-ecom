@@ -4,7 +4,7 @@ import Title from '../dashboard/Title';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
-export default function Invoices() {
+export default function Invoices(props) {
     const date = new Date();
     const todayDate = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
     const [rows, setRows] = useState([]);
@@ -20,6 +20,8 @@ export default function Invoices() {
         if (from_date !== ''){
             params.push(`from_date=${from_date}`)
         }
+        params.push(`customer=${props.id}`)
+
         const queryParams = params.join('&')
         if(queryParams !== ''){
             url = `${url}?${queryParams}`;
