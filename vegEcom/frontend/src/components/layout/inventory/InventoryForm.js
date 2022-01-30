@@ -403,7 +403,11 @@ export default function InventoryForm(props) {
                                             InputProps={{
                                                 startAdornment: <InputAdornment position="start">₹</InputAdornment>,
                                             }}
-                                            onChange={e => setRPrice(e.target.value)}
+                                            onChange={e => {
+                                                setRPrice(e.target.value)
+                                                setHPrice(e.target.value)
+                                                setGPrice(e.target.value)
+                                            }}
                                             error={rPriceError}
                                             helperText="Enter Restraunt Price"
                                         />
@@ -419,7 +423,11 @@ export default function InventoryForm(props) {
                                             InputProps={{
                                                 endAdornment: <InputAdornment position="end">KGS</InputAdornment>,
                                             }}
-                                            onChange={e => setRQty(e.target.value) }
+                                            onChange={e => {
+                                                setRQty(e.target.value)
+                                                setGQty(e.target.value)
+                                                setHQty(e.target.value)
+                                            } }
                                             error={rQtyError}
                                             helperText="Enter Qunatity"
                                         />
