@@ -12,6 +12,7 @@ import Inventory from './pages/Inventory'
 import ProductMedia from './layout/masters/ProductMedia'
 import Users from './layout/masters/Users';
 import Pincodes from './layout/masters/Pincodes';
+import Quotations from './pages/Quotations';
 import LoadingBar from 'react-top-loading-bar'
 import { useLocation } from 'react-router-dom'
 
@@ -180,6 +181,20 @@ const App = function () {
                         render={({ location }) =>
                             isTokenValid ? (
                                 <Pincodes />
+                            ) : (
+                                <Redirect
+                                    to={{
+                                        pathname: "/Login",
+                                        state: { from: location }
+                                    }}
+                                />
+                            )
+                        }
+                    />
+                    <Route path="/Quotations"
+                        render={({ location }) =>
+                            isTokenValid ? (
+                                <Quotations />
                             ) : (
                                 <Redirect
                                     to={{

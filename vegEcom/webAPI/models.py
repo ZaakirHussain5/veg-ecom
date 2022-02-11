@@ -1,3 +1,5 @@
+from email.policy import default
+from unicodedata import decimal
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Max
@@ -12,6 +14,53 @@ def generateInvoiceID():
     if uid == None:
         uid = 0 
     return 'VBI'+ str(now.year) + str(uid+1)
+
+def generateQuotationNo():
+    import datetime
+    now = datetime.datetime.now()
+    uid = Quotation.objects.aggregate(Max('id'))
+    uid = uid['id__max'] 
+    if uid == None:
+        uid = 0 
+    return 'VBQ'+ str(now.year) + str(uid+1)
+
+
+class Quotation(models.Model):
+    quotationNo = models.CharField(max_length=15,default=generateQuotationNo)
+    name = models.CharField(max_length=120)
+    email = models.CharField(max_length=120,null=True,blank=True)
+    phoneNumber = models.CharField(max_length=15)
+    address = models.TextField(null=True,blank=True)
+    total = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
+    discount = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
+    totalCharges = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
+    grandTotal = models.DecimalField(max_digits=10,decimal_places=2,default=0.00)
+
+    created_at=models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.quotationNo
+
+class QuotationItem(models.Model):
+    quotation = models.ForeignKey(Quotation,on_delete=models.CASCADE,related_name="QuotationItems",null=True,blank=True)
+    item = models.CharField(max_length=120)
+    price = models.DecimalField(max_digits=10,decimal_places=2)
+    qty = models.DecimalField(max_digits=10,decimal_places=2)
+    unit = models.CharField(max_length=120)
+    total = models.DecimalField(max_digits=10,decimal_places=2)
+
+    def __str__(self):
+        return self.item
+
+class QuotationCharges(models.Model):
+    quotation = models.ForeignKey(Quotation,on_delete=models.CASCADE,related_name="QuotationCharges",null=True,blank=True)
+    chargeName = models.CharField(max_length=20)
+    chargeAmount = models.DecimalField(max_digits=10,decimal_places=2)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 
 class Invoice(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="Invoices",null=True,blank=True)

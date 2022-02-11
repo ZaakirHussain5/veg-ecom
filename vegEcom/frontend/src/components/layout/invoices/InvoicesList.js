@@ -94,7 +94,7 @@ export default function InvoicesList() {
                     size="small"
                     onClick={() => setInvoiceId(GridCellParams.value)}
                 >
-                    View
+                    Edit
                 </Button>
             ),
         },

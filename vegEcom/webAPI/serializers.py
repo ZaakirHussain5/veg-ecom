@@ -1,9 +1,9 @@
+from pyexpat import model
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from django.db.models import Sum, fields
 
-from .models import Invoice,InvoiceItem,UserCreditLedger,ServiceLocation,InvoiceCharges 
+from .models import Invoice,InvoiceItem, QuotationCharges, QuotationItem,UserCreditLedger,ServiceLocation,InvoiceCharges,Quotation
 from mobileAPI.serializers import UserSerializer,ProductMediaSerializer
 from mobileAPI.models import Order,Product,Type
 
@@ -43,6 +43,7 @@ class CreateInvoiceSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True,required=False)
 
     def create(self, validated_data):
+        email = validated_data.pop('email')
         invoice_items = validated_data.pop('items')
         invoice_charges = validated_data.pop('charges')
         fullname = validated_data.pop('fullname')
@@ -68,6 +69,64 @@ class CreateInvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = ('id','invoiceID','shippingAddress','billingAddress','total','discount','grandTotal','paid','balance','status','items','fullname','phoneNo','charges','orderId','user')
+
+
+class QuotationChargesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuotationCharges
+        fields = '__all__'
+
+class QuotationItemsSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = QuotationItem
+        fields = '__all__'
+
+class QuotationSerializer(serializers.ModelSerializer):
+    QuotationItems = QuotationItemsSerializers(many=True)
+    QuotationCharges= QuotationChargesSerializer(many=True)
+
+    def create(self,data):
+        charges = data.pop('QuotationCharges')
+        items = data.pop('QuotationItems')
+
+        newQuotation = Quotation.objects.create(**data)
+
+        for charge in charges:
+            QuotationCharges.objects.create(quotation=newQuotation,**charge)
+        
+        for item in items:
+            QuotationItem.objects.create(quotation=newQuotation,**item)
+        
+        return newQuotation
+
+    def update(self,instance,data):
+        charges = data.pop('QuotationCharges')
+        items = data.pop('QuotationItems')
+
+        for attr,value in data.items():
+            setattr(instance,attr,value)
+        
+        instance.save()
+
+        QuotationCharges.objects.filter(quotation=instance).delete()
+        QuotationItem.objects.filter(quotation=instance).delete()
+
+        for charge in charges:
+            QuotationCharges.objects.create(quotation=instance,**charge)
+        
+        for item in items:
+            QuotationItem.objects.create(quotation=instance,**item)
+
+        return instance
+
+        
+
+
+    class Meta:
+        model = Quotation
+        fields = ('id','quotationNo','address','name','email','phoneNumber','total','discount','totalCharges','grandTotal','created_at','QuotationCharges','QuotationItems')
+
+
 
 class UpdateInvoiceSerializer(serializers.ModelSerializer):
     items = InvoiceItemSerializer(many=True)

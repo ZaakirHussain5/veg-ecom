@@ -110,6 +110,12 @@
                                     </td>
                                     <td class="text-right">INR {{ invoice.discount }}</td>
                                 </tr>
+                                {% for charge in invoice.charges.all %}
+                                <tr>
+                                    <td><strong>{{ charge.chargeName }}</strong></td>
+                                    <td class="text-right">INR {{ charge.chargeAmount }}</td>
+                                </tr>
+                                {% endfor %}
                                 <tr>
                                     <td class="left">
                                         <strong>Total</strong>
@@ -129,7 +135,7 @@
             </div>
         </div>
     </div>
-    <p class="text-center">Lorem ipsum dolor sit amet, consectetur adipisicing.</p>
+    <p class="text-center">This is System generated Invoice and signature is not required.</p>
     {% endif %}
 <script>
     document.querySelector('#PrintButton').addEventListener('click',function(){

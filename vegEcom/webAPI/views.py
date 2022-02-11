@@ -9,8 +9,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view,permission_classes
 
-from .serializers import AdminUserSerializer, LoginSerializer,InvoiceSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer,ServiceLocationSerializer
-from .models import Invoice,UserCreditLedger,ServiceLocation
+from .serializers import AdminUserSerializer, LoginSerializer,InvoiceSerializer, QuotationSerializer,UserTransactionSerializer,CreateInvoiceSerializer,UpdateInvoiceSerializer,ProductSerializer,UpdateProductSerializer,ServiceLocationSerializer
+from .models import Invoice, Quotation,UserCreditLedger,ServiceLocation
 from mobileAPI.serializers import OrderSerializer, OrderListSerialiizer,UserSerializer,ProductMediaSerializer
 from mobileAPI.models import Order,Product,ProductMedia
 
@@ -27,6 +27,19 @@ def invoice(request):
     except Invoice.DoesNotExist:
         context["Error"] = "404! No Invoice Found for id "+invoiceID
     return render(request,'invoice.html',context)
+
+def quotation(request):
+    quotationNo = request.GET.get('quotation')
+    context = {}
+    if quotationNo is None:
+        context["Error"] = "400! Quotation ID Not Found in the url"
+        return render(request,'invoice.html',context)
+    try:
+        quotationInstance = Quotation.objects.get(id=quotationNo)
+        context["quotation"] = quotationInstance
+    except Quotation.DoesNotExist:
+        context["Error"] = "404! No Quotation Found for id "+quotationNo
+    return render(request,'quotation.html',context)
 
 class LoginAPI(generics.GenericAPIView):
     serializer_class = LoginSerializer
@@ -269,6 +282,11 @@ class ServicesLocationAPI(viewsets.ModelViewSet):
     serializer_class = ServiceLocationSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = ServiceLocation.objects.all()
+
+class QuotationsAPI(viewsets.ModelViewSet):
+    serializer_class = QuotationSerializer
+    permission_classes=[permissions.IsAdminUser]
+    queryset=Quotation.objects.all()
 
     
 
