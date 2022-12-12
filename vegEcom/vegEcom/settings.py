@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-$uvb@6b)o6c81$m-#2c4#xsuqvuo-dle3_=_1eej1i4%#21&=3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','vbag.pythonanywhere.com']
+ALLOWED_HOSTS = ['localhost','127.0.0.1','vbag.pythonanywhere.com','Vegbags-env.eba-mmyz5pmb.us-west-2.elasticbeanstalk.com','vegbags.in']
 
 
 # Application definition
@@ -87,7 +87,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -133,7 +132,7 @@ REST_FRAMEWORK = {
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = os.path.join(BASE_DIR,'static')
+STATIC_ROOT = 'static'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 
 # Default primary key field type

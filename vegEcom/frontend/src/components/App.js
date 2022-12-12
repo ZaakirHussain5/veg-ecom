@@ -31,8 +31,6 @@ const theme = createMuiTheme({
 const App = function () {
     var [isTokenValid, setIsTokenValid] = useState(true)
 
-    const ref = useRef(null)
-
     let location = useLocation();
 
     useEffect(() => {
