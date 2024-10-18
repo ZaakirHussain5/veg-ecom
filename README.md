@@ -11,7 +11,6 @@ A **farm-to-table delivery platform** designed to streamline operations and enha
 4. [Configuration](#configuration)  
 5. [Usage](#usage)  
 6. [Testing](#testing)  
-7. [Deployment](#deployment)  
 
 ---
 
@@ -82,45 +81,10 @@ A **farm-to-table delivery platform** designed to streamline operations and enha
    python manage.py collectstatic  
    ```
 
-8. **Start the Redis server:**  
-   ```bash
-   redis-server  
-   ```
-
-9. **Run the Django server:**  
+8. **Run the Django server:**  
    ```bash
    python manage.py runserver  
    ```
-
----
-
-## **Configuration**  
-1. **Django Channels and Redis Configuration:**  
-   - Add `channels` to the Django `INSTALLED_APPS` list.  
-   - Update the `CHANNEL_LAYERS` configuration in `settings.py` to use Redis:  
-     ```python
-     CHANNEL_LAYERS = {
-         "default": {
-             "BACKEND": "channels_redis.core.RedisChannelLayer",
-             "CONFIG": {
-                 "hosts": [("127.0.0.1", 6379)],
-             },
-         },
-     }
-     ```
-
-2. **AWS Configuration:**  
-   - Use **S3** for static file storage.  
-   - Deploy backend on **EC2** for production.  
-
----
-
-## **Usage**  
-- **Customers:** Browse products, place orders, and provide feedback.  
-- **Delivery Personnel:** Track orders and receive live updates.  
-- **Admin:** Manage orders, monitor feedback, and optimize operations.  
-
----
 
 ## **Testing**  
 Run the tests to verify all components:  
@@ -130,17 +94,6 @@ npm test  # For frontend tests
 ```
 
 ---
-
-## **Deployment**  
-1. **Backend Deployment:**  
-   - Use **Gunicorn** and **Nginx** to serve the Django app on AWS EC2.  
-
-2. **Frontend Deployment:**  
-   - Build the React app:  
-     ```bash
-     npm run build  
-     ```  
-   - Serve the static files using AWS S3 or Nginx.  
 
 ## **Contact**  
 For queries or support, reach out to:  
